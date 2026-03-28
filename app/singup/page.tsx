@@ -35,7 +35,7 @@ const SignUpPage = () => {
 
     const containerClassName = classNames(
         'surface-ground flex align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden',
-        { 'p-input-filled': layoutConfig.inputStyle === 'filled' }
+        { 'p-input-filled': layoutConfig?.inputStyle === 'filled' }
     );
 
     const handleAuth = async () => {
