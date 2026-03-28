@@ -1,0 +1,203 @@
+/* Right Sidebar Styles */
+
+.layout-right-sidebar {
+    position: fixed;
+    right: 0;
+    top: 5rem;
+    width: 80px;
+    height: calc(100vh - 5rem);
+    // background: var(--surface-card);
+    // border-left: 1px solid var(--surface-border);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px 0;
+    gap: 10px;
+    z-index: 1000;
+    transition: all 0.3s ease;
+
+    @media screen and (max-width: 768px) {
+        width: 70px;
+    }
+
+    @media screen and (max-width: 576px) {
+        width: 60px;
+        padding: 15px 0;
+    }
+}
+
+.layout-right-sidebar-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+}
+
+.layout-right-sidebar-button {
+    position: relative;
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-color);
+    transition: all 0.2s ease;
+    background-color: var(--surface-ground);
+    border: none; /* Removed border */
+
+    &:hover {
+        background-color: var(--primary-color);
+        color: var(--primary-color-text);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    &:focus {
+        outline: none;
+    }
+
+    i {
+        font-size: 1.25rem;
+    }
+}
+
+/* Notification dot animation */
+.notification-wrapper {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notification-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: red; /* blinking dot */
+  animation: blink 1s infinite;
+  z-index: 2;
+}
+
+.notification-border {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid red; /* pulsing border */
+  background-color: transparent;
+  animation: pulse-border 1.2s infinite;
+  z-index: 1;
+}
+
+@keyframes blink {
+  0%, 50%, 100% { opacity: 1; }
+  25%, 75% { opacity: 0; }
+}
+
+@keyframes pulse-border {
+  0% { transform: scale(0.5); opacity: 0.6; }
+  50% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+/* users dot animation */
+.user-wrapper {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: red; /* blinking dot */
+  animation: blinkuser 1s infinite;
+  z-index: 2;
+}
+
+.user-border {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid red; /* pulsing border */
+  background-color: transparent;
+  animation: pulse-border-user 1.2s infinite;
+  z-index: 1;
+}
+
+@keyframes blinkuser {
+  0%, 50%, 100% { opacity: 1; }
+  25%, 75% { opacity: 0; }
+}
+
+@keyframes pulse-border-user {
+  0% { transform: scale(0.5); opacity: 0.6; }
+  50% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(1.5); opacity: 0; }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+.layout-right-sidebar-badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: var(--red-500);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: bold;
+    padding: 2px 6px;
+    border-radius: 10px;
+    min-width: 20px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+// Adjust main container to account for right sidebar
+.layout-main-container {
+    margin-right: 80px;
+
+    @media screen and (max-width: 768px) {
+        margin-right: 70px;
+    }
+
+    @media screen and (max-width: 576px) {
+        margin-right: 60px;
+    }
+}
+
+// Hide right sidebar on mobile for now
+@media screen and (max-width: 576px) {
+    .layout-right-sidebar {
+        display: none;
+    }
+
+    .layout-main-container {
+        margin-right: 0;
+    }
+}
