@@ -7,8 +7,8 @@ import { Checkbox } from 'primereact/checkbox';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 
-import { UserType } from '../users/page';
-import { updateUser } from '@/firebaseUtils';
+
+import { updateUser, UserType } from '@/firebaseUtils';
 
 export default function UserEditPage() {
     const router = useRouter();

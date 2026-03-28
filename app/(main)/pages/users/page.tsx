@@ -13,7 +13,8 @@ import { InputText } from 'primereact/inputtext';
 import { ToggleButton } from 'primereact/togglebutton';
 import { classNames } from 'primereact/utils';
 import React, { useEffect, useState, useRef } from 'react';
-import { getAllUsers, updateUserStatus, updateUser, deleteUser, UserType } from '@/firebaseUtils';;
+import { getAllUsers, updateUserStatus, updateUser, deleteUser, UserType, } from '@/firebaseUtils';;
+
 import { Checkbox } from 'primereact/checkbox';
 
 
@@ -27,6 +28,7 @@ import { useRouter } from 'next/navigation';
 
 import { db } from '@/firebase';
 import { ref, get, update } from 'firebase/database';
+
 const Users = () => {
     const [users, setUsers] = useState<UserType[]>([]);
     const [userUpdate, setUserUpate] = useState<UserType>({

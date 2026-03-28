@@ -12,7 +12,7 @@ import AppRightSidebar from './AppRightSidebar';
 import AppConfig from './AppConfig';
 import { LayoutContext } from './context/layoutcontext';
 import { PrimeReactContext } from 'primereact/api';
-import { ChildContainerProps, AppTopbarRef } from '@/types';
+import { ChildContainerProps, AppTopbarRef, LayoutState } from '@/types';
 import { usePathname, useSearchParams } from 'next/navigation';
 
 const Layout = ({ children }: ChildContainerProps) => {
