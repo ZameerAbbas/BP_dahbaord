@@ -58,7 +58,6 @@ const Layout = ({ children }: ChildContainerProps) => {
             }
         }
     });
-
     const hideMenu = () => {
         setLayoutState((prevLayoutState: LayoutState) => ({
             ...prevLayoutState,
