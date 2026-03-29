@@ -1,6 +1,6 @@
 
 import { db } from './firebase';
-import { ref, get, update, child,remove,onValue   } from 'firebase/database';
+import { ref, get, update, child,remove,onValue, set, push   } from 'firebase/database';
 
  export interface OrderType {
     id: string;
@@ -24,6 +24,7 @@ export interface UserType {
     uid: string;
     email: string;
     displayName: string;
+    userName: string;
     isAccepted: boolean;
     createdAt: string;
     isAdmin: boolean;
@@ -31,6 +32,24 @@ export interface UserType {
     bpUsername: string
     phoneNumber: any;
     updatedAt: any;
+}
+export interface withdrawalTimeType {
+    uid: string;
+    fromtime: string;
+    toTime: string;
+    WhatappNumber: string;
+    url: string;
+
+}
+export interface bankInfoType {
+    uid: string;
+    bankName: string;
+    accountTitle: string;
+    accountNumber: string;
+    category: string;
+    status: boolean;
+    limit: number;
+
 }
 
 export const getAllUsers = async () => {
@@ -75,7 +94,7 @@ export const getAllPendingUsers = (callback: (users: UserType[]) => void) => {
         uid,
         ...userData,
       }))
-      .filter((user) => user.isAccepted === false);
+      .filter((user) => user.isAccepted === false && user.isAdmin === false);
 
     callback(pendingUsers);
   });
@@ -147,7 +166,7 @@ export const listenDepositOrders = (callback: (deposits: OrderType[]) => void) =
           ...order,
         }))
       )
-      .filter((order: OrderType) => order.isDeposit === true);
+      .filter((order: OrderType) => order.isDeposit === true && order.status === "pending" );
 
     callback(depositsList);
   });
@@ -191,7 +210,7 @@ export const listenWithdrawalOrders = (callback: (withdrawals: OrderType[]) => v
           ...order,
         }))
       )
-      .filter((order: OrderType) => order.isDeposit === false);
+      .filter((order: OrderType) => order.isDeposit === false && order.status === "pending" );
 
     callback(withdrawalsList);
   });
@@ -224,4 +243,97 @@ export const updateOrderStatus = async (uid: string, orderId: string, newStatus:
     const orderRef = ref(db, `orders/${uid}/${orderId}`);
     await update(orderRef, { status: newStatus });
     console.log(`Order ${orderId} of user ${uid} updated with status=${newStatus}`);
+};
+
+
+
+export const createWithdrawalTime = async (data: withdrawalTimeType) => {
+  try {
+    const withdrawalRef = ref(db, "withdrawalTimes");
+    const newRef = push(withdrawalRef);
+
+    const payload = {
+      ...data,
+      uid: newRef.key, // generate UID
+    };
+
+    await set(newRef, payload);
+
+    return payload;
+  } catch (error) {
+    console.error("Error creating withdrawal time:", error);
+    throw error;
+  }
+};
+
+export const getAllWithdrawalTimes = async (): Promise<Record<string, withdrawalTimeType>> => {
+  try {
+    const withdrawalRef = ref(db, "withdrawalTimes");
+    const snapshot = await get(withdrawalRef);
+
+    if (snapshot.exists()) {
+      return snapshot.val();
+    }
+
+    return {};
+  } catch (error) {
+    console.error("Error fetching withdrawal times:", error);
+    throw error;
+  }
+};
+
+
+export const updateWithdrawalTime = async (uid: string, data: any) => {
+  const refPath = ref(db, `withdrawalTimes/${uid}`);
+  await update(refPath, data);
+};
+
+
+
+
+export const listenBanks = (callback: (data: any[]) => void) => {
+  const banksRef = ref(db, "banks");
+
+  const unsubscribe = onValue(banksRef, (snapshot) => {
+    if (snapshot.exists()) {
+      const data = snapshot.val();
+      callback(Object.values(data));
+    } else {
+      callback([]);
+    }
+  });
+
+  return () => unsubscribe();
+};
+
+export const updateBankStatus = async (uid: string, status: boolean) => {
+  await update(ref(db, `banks/${uid}`), { status });
+};
+
+export const deleteBank = async (uid: string) => {
+  await remove(ref(db, `banks/${uid}`));
+};
+
+export const createBank = async (data: any) => {
+  const newRef = push(ref(db, "banks"));
+
+  await set(newRef, {
+    ...data,
+    uid: newRef.key
+  });
+};
+
+export const updateBank = async (uid: string, data: any) => {
+  await update(ref(db, `banks/${uid}`), data);
+};
+
+
+export const getBankById = async (uid: string) => {
+  const snapshot = await get(ref(db, `banks/${uid}`));
+
+  if (snapshot.exists()) {
+    return snapshot.val();
+  }
+
+  return null;
 };

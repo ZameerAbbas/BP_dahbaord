@@ -3,12 +3,17 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-import { Checkbox } from 'primereact/checkbox';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
-
+import { Dropdown } from 'primereact/dropdown';
 
 import { updateUser, UserType } from '@/firebaseUtils';
+
+const statusOptions = [
+    { label: 'Approved', value: 'Approve' }, // Matches "Approved" in the image
+    { label: 'Reject', value: 'Reject' },
+    { label: 'Pending', value: 'Pending' },
+];
 
 export default function UserEditPage() {
     const router = useRouter();
@@ -17,6 +22,7 @@ export default function UserEditPage() {
         uid: '',
         email: '',
         displayName: '',
+        userName: '',
         isAccepted: false,
         isAdmin: false,
         createdAt: '',
@@ -27,14 +33,13 @@ export default function UserEditPage() {
     });
 
     const [loading, setLoading] = useState(true);
+    const [confirmPassword, setConfirmPassword] = useState('');
 
     useEffect(() => {
         const data = localStorage.getItem('userData');
-
         if (data) {
             setUser(JSON.parse(data));
         }
-
         setLoading(false);
     }, []);
 
@@ -44,96 +49,114 @@ export default function UserEditPage() {
 
     const saveHandle = async () => {
         const { uid, ...updates } = user;
-
         await updateUser(uid, updates);
-
-        // ✅ clear storage
         localStorage.removeItem('userData');
-
-        // ✅ redirect back
         router.push('/pages/users');
     };
 
     if (loading) return <div>Loading...</div>;
 
     return (
-        <div className="card">
-            <h2 className="mb-4">Edit User</h2>
+        <div className="surface-ground p-4" style={{ minHeight: '100vh' }}>
+            <div className="card p-6 shadow-2 border-round surface-card max-w-full">
+                {/* 2 Column Responsive Grid */}
+                <div className="grid p-fluid">
 
-            {/* ✅ 2 Column Grid */}
-            <div className="grid formgrid">
+                    {/* Row 1: Name & Phone */}
+                    <div className="col-12 md:col-8">
+                        <label className="block font-medium mb-2">Name</label>
+                        <InputText
+                            value={user.displayName}
+                            onChange={(e) => handleChange('displayName', e.target.value)}
+                            placeholder="name.."
+                        />
+                    </div>
+                    <div className="col-12 md:col-4">
+                        <label className="block font-medium mb-2">Phone</label>
+                        <InputText
+                            value={user.phoneNumber}
+                            onChange={(e) => handleChange('phoneNumber', e.target.value)}
+                            placeholder="phone.."
+                        />
+                    </div>
 
-                {/* LEFT COLUMN */}
-                <div className="col-12 md:col-6">
-                    <label>Name</label>
-                    <InputText
-                        value={user.displayName}
-                        onChange={(e) => handleChange('displayName', e.target.value)}
-                        className="w-full mb-3"
-                    />
+                    {/* Row 2: User Name (Full Width in its row based on image) */}
+                    <div className="col-12 md:col-8">
+                        <label className="block font-medium mb-2">User Name</label>
+                        <InputText
+                            value={user.userName}
+                            onChange={(e) => handleChange('userName', e.target.value)}
+                            placeholder="username.."
+                        />
+                    </div>
+                    <div className="col-12 md:col-4"></div> {/* Spacer to keep username left-aligned */}
 
-                    <label>Email</label>
-                    <InputText
-                        value={user.email}
-                        onChange={(e) => handleChange('email', e.target.value)}
-                        className="w-full mb-3"
-                    />
+                    {/* Row 3: Email & BP Username */}
+                    <div className="col-12 md:col-8">
+                        <label className="block font-medium mb-2">email</label>
+                        <InputText
+                            value={user.email}
+                            onChange={(e) => handleChange('email', e.target.value)}
+                            placeholder="email.."
+                        />
+                    </div>
+                    <div className="col-12 md:col-4">
+                        <label className="block font-medium mb-2">BP Username</label>
+                        <InputText
+                            value={user.bpUsername}
+                            onChange={(e) => handleChange('bpUsername', e.target.value)}
+                            placeholder="bpUsername.."
+                        />
+                    </div>
 
-                    <label>BP Username</label>
-                    <InputText
-                        value={user.bpUsername}
-                        onChange={(e) => handleChange('bpUsername', e.target.value)}
-                        className="w-full mb-3"
-                    />
-                </div>
+                    {/* Row 4: BP Password & Status */}
+                    <div className="col-12 md:col-8">
+                        <label className="block font-medium mb-2">BP Password</label>
+                        <InputText
+                            value={user.bpPassword}
+                            onChange={(e) => handleChange('bpPassword', e.target.value)}
+                            placeholder="bpPassword.."
+                        />
+                    </div>
+                    <div className="col-12 md:col-4">
+                        <label className="block font-medium mb-2">Status</label>
+                        <Dropdown
+                            value={user.isAccepted ? 'Approve' : 'Pending'}
+                            options={statusOptions}
+                            onChange={(e) => handleChange('isAccepted', e.value === 'Approve')}
+                            placeholder="Select status"
+                        />
+                    </div>
 
-                {/* RIGHT COLUMN */}
-                <div className="col-12 md:col-6">
-                    <label>BP Password</label>
-                    <InputText
-                        value={user.bpPassword}
-                        onChange={(e) => handleChange('bpPassword', e.target.value)}
-                        className="w-full mb-3"
-                    />
-
-                    <label>Phone Number</label>
-                    <InputText
-                        value={user.phoneNumber}
-                        onChange={(e) => handleChange('phoneNumber', e.target.value)}
-                        className="w-full mb-3"
-                    />
-                    <div className='flex  justify-between items-center'>
-
-                        <div className="flex align-items-center gap-4  mt-4">
-                            <Checkbox
-                                inputId="isAccepted"
-                                checked={user.isAccepted}
-                                onChange={(e) => handleChange('isAccepted', e.checked)}
-                            />
-                            <label htmlFor="isAccepted">Accepted</label>
-                        </div>
-
-                        <div className="flex align-items-center gap-4">
-                            <Checkbox
-                                inputId="isAdmin"
-                                checked={user.isAdmin}
-                                onChange={(e) => handleChange('isAdmin', e.checked)}
-                            />
-                            <label htmlFor="isAdmin">Admin</label>
-                        </div>
+                    {/* Row 5: Password & Confirm Password */}
+                    <div className="col-12 md:col-8">
+                        <label className="block font-medium mb-2">Password</label>
+                        <InputText
+                            type="password"
+                            placeholder="password.."
+                            onChange={(e) => handleChange('bpPassword', e.target.value)} // Assuming this updates main password
+                        />
+                    </div>
+                    <div className="col-12 md:col-4">
+                        <label className="block font-medium mb-2">Confirm Password</label>
+                        <InputText
+                            value={confirmPassword}
+                            type="password"
+                            placeholder="cnfrm password.."
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                        />
                     </div>
                 </div>
-            </div>
 
-            {/* ACTION BUTTON */}
-            <div className="mt-4 flex gap-2">
-                <Button label="Update" icon="pi pi-check" onClick={saveHandle} />
-                <Button
-                    label="Cancel"
-                    icon="pi pi-times"
-                    className="p-button-secondary"
-                    onClick={() => router.push('/pages/users')}
-                />
+                {/* Submit Button aligned like the image */}
+                <div className="mt-6 flex justify-center">
+                    <Button
+                        label="Update"
+                        className="p-button-success px-6"
+                        onClick={saveHandle}
+                        style={{ backgroundColor: '#28a745', border: 'none' }}
+                    />
+                </div>
             </div>
         </div>
     );

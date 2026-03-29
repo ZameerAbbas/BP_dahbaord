@@ -1,48 +1,19 @@
-
-
-
-
-
-
 'use client';
 import { FilterMatchMode, FilterOperator } from 'primereact/api';
 import { Button } from 'primereact/button';
 import { Column, ColumnFilterClearTemplateOptions, ColumnFilterApplyTemplateOptions } from 'primereact/column';
 import { DataTable, DataTableFilterMeta } from 'primereact/datatable';
 import { InputText } from 'primereact/inputtext';
-import { ToggleButton } from 'primereact/togglebutton';
 import { classNames } from 'primereact/utils';
 import React, { useEffect, useState, useRef } from 'react';
-import { getAllUsers, updateUserStatus, updateUser, deleteUser, UserType, } from '@/firebaseUtils';;
-
-import { Checkbox } from 'primereact/checkbox';
-
-
+import { getAllUsers, updateUserStatus, UserType, } from '@/firebaseUtils';;
 import { Toast } from "primereact/toast";
-import { Dialog } from "primereact/dialog";
-
 import { useRouter } from 'next/navigation';
 
 
-
-
-import { db } from '@/firebase';
-import { ref, get, update } from 'firebase/database';
-
 const Users = () => {
     const [users, setUsers] = useState<UserType[]>([]);
-    const [userUpdate, setUserUpate] = useState<UserType>({
-        uid: '',
-        email: '',
-        displayName: '',
-        isAccepted: false,
-        isAdmin: false,
-        createdAt: '',
-        bpPassword: '',
-        bpUsername: '',
-        phoneNumber: '',
-        updatedAt: null
-    });
+
 
     const [loading, setLoading] = useState(true);
     const [filters, setFilters] = useState<DataTableFilterMeta>({});
@@ -56,6 +27,8 @@ const Users = () => {
     const clearFilter = () => {
         initFilters();
     };
+
+
 
     const router = useRouter();
 
@@ -125,13 +98,7 @@ const Users = () => {
         setGlobalFilterValue('');
     };
 
-    const formatDate = (dateString: string) => {
-        return new Date(dateString).toLocaleDateString('en-US', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-        });
-    };
+
 
     const isAcceptedBodyTemplate = (rowData: UserType) => {
         return (
@@ -141,17 +108,6 @@ const Users = () => {
                     'text-pink-500 pi-times-circle': !rowData.isAccepted
                 })}
             ></i>
-        );
-    };
-
-    const acceptToggleTemplate = (rowData: UserType) => {
-        return (
-            <ToggleButton
-                checked={rowData.isAccepted}
-                onChange={(e) => handleToggleIsAccepted(rowData.uid, e.value)}
-                onIcon="pi pi-check"
-                offIcon="pi pi-times"
-            />
         );
     };
 
@@ -183,9 +139,6 @@ const Users = () => {
 
     if (loading) return <div className="p-4">Loading users...</div>;
 
-    console.log("userList", users)
-
-
     const actionBodyTemplate = (rowData: UserType) => {
         return (
             <div className="flex gap-1">
@@ -200,115 +153,14 @@ const Users = () => {
         router.push(`/pages/useredit`);
     };
 
-    const handleChange = (field: keyof UserType, value: any) => {
-        if (userUpdate) {
-            setUserUpate({ ...userUpdate, [field]: value });
-        }
-    };
-
-
-    const hideDeleteDuessDialog = () => {
-        setDeleteDialog(false);
-        setUserUpate({
-            uid: '',
-            email: '',
-            displayName: '',
-            isAccepted: false,
-            isAdmin: false,
-            createdAt: '',
-            bpPassword: '',
-            bpUsername: '',
-            phoneNumber: '',
-            updatedAt: null
-        })
-    };
-
 
     const confirmDeleteLatePayments = (userData: UserType) => {
         setDeleteDialog(true);
-        setUserUpate(userData)
-    };
 
-    console.log("Update User", userUpdate)
-
-
-
-    const handleDelete = async () => {
-        try {
-            await deleteUser(userUpdate.uid);
-
-            setUsers((prev) => prev.filter((u) => u.uid !== userUpdate.uid));
-
-            // Option 2 (optional): reload from DB
-            // await loadUsers();
-
-        } catch (error) {
-            console.error(error);
-        }
     };
 
 
-    const saveHandle = async () => {
-        if (userUpdate) {
-            const { uid, ...updates } = userUpdate;
-
-            await updateUser(uid, updates);
-
-            setUsers((prev) =>
-                prev.map((u) =>
-                    u.uid === uid ? { ...u, ...updates } : u
-                )
-            );
-
-            setUpdateDialog(false);
-            // toast && toast.current.show({ severity: "success", summary: "Loaded", detail: "LatePayments Updated", life: 3000 });
-        } else {
-            // toast && toast.current.show({ severity: "error", summary: "Error", detail: d["errors"], life: 3000 });
-        }
-    };
-
-
-    const hideDialog = () => {
-
-        setUpdateDialog(false);
-        setUserUpate({
-            uid: '',
-            email: '',
-            displayName: '',
-            isAccepted: false,
-            isAdmin: false,
-            createdAt: '',
-            bpPassword: '',
-            bpUsername: '',
-            phoneNumber: '',
-            updatedAt: null
-        })
-    };
-
-    const duesDialogFooter = (
-        <>
-            <Button label="Cancel" icon="pi pi-edit" className="p-button-text" onClick={hideDialog} />
-            <Button label="Save" icon="pi pi-check" className="p-button-text" onClick={saveHandle} />
-        </>
-    );
-
-    const deleteDialogFooter = (
-        <>
-            <Button label="Cancel" icon="pi pi-cancel" className="p-button-text" onClick={hideDeleteDuessDialog} />
-            <Button label="Delete" icon="pi pi-trash" className="p-button-text" onClick={handleDelete} />
-        </>
-    );
-
-
-
-
-    const filteredUsers = statusFilter === 'All'
-        ? users
-        : statusFilter === 'Active'
-            ? users.filter(u => u.isAccepted)
-            : users.filter(u => !u.isAccepted);
-
-    const displayUsers = filteredUsers.filter(user =>
+    const displayUsers = users.filter(user =>
         globalFilterValue === '' ||
         user.displayName?.toLowerCase().includes(globalFilterValue.toLowerCase()) ||
         user.email?.toLowerCase().includes(globalFilterValue.toLowerCase())
@@ -318,7 +170,7 @@ const Users = () => {
         <div className="grid">
             <div className="col-12">
                 <div className="card">
-                    <Toast ref={toast} />
+
 
                     {/* Page Title */}
                     <div className="mb-4">
@@ -337,93 +189,34 @@ const Users = () => {
 
                     <DataTable
                         value={displayUsers}
-                        paginator
+                        // paginator
                         className="p-datatable-gridlines"
                         showGridlines
-                        rows={10}
+                        // rows={10}
                         dataKey="uid"
                         filters={filters}
                         filterDisplay="menu"
                         loading={loading}
                         responsiveLayout="scroll"
                         emptyMessage="No users found."
+                        scrollable
+                        scrollHeight="60vh"
                     >
                         <Column field="displayName" header="Name" filterPlaceholder="Search by name" style={{ minWidth: '12rem' }} />
                         <Column field="email" header="Email" filterPlaceholder="Search by email" style={{ minWidth: '15rem' }} />
                         <Column field="phoneNumber" header="Phone Number" filterPlaceholder="Search by phoneNumber" style={{ minWidth: '15rem' }} />
                         <Column field="bpUsername" header="BP Username" filterPlaceholder="Search by bpUsername" style={{ minWidth: '15rem' }} />
                         <Column field="bpPassword" header="BP Password" filterPlaceholder="Search by bpPassword" style={{ minWidth: '15rem' }} />
-                        <Column field="createdAt" header="Created Date" body={(rowData) => formatDate(rowData.createdAt)} style={{ minWidth: '10rem' }} />
-                        <Column field="updatedAt" header="Update Date" body={(rowData) => formatDate(rowData.updatedAt)} style={{ minWidth: '10rem' }} />
-                        <Column field="isAdmin" header="Admin" body={(rowData) => rowData.isAdmin ? <i className="pi pi-check text-green-500"></i> : <i className="pi pi-times text-red-500"></i>} style={{ minWidth: '8rem' }} />
                         <Column field="isAccepted" header="Active" body={isAcceptedBodyTemplate} style={{ minWidth: '8rem' }} />
-                        <Column header="Toggle Accept" body={acceptToggleTemplate} style={{ minWidth: '10rem' }} />
                         <Column header="Action" body={actionBodyTemplate} headerStyle={{ minWidth: "13rem" }}></Column>
                     </DataTable>
                 </div>
             </div>
 
 
-            <Dialog visible={updateDialog} style={{ width: "450px" }} header="Update User Detais" modal className="p-fluid" footer={duesDialogFooter} onHide={hideDialog}>
-                <div className="field">
-                    <label htmlFor="displayName">Name</label>
-                    <InputText
-                        id="displayName"
-                        value={userUpdate.displayName}
-                        onChange={(e) => handleChange('displayName', e.target.value)}
-                        className="w-full mb-3"
-                    />
-
-                    <label htmlFor="email">Email</label>
-                    <InputText
-                        id="email"
-                        value={userUpdate.email}
-                        onChange={(e) => handleChange('email', e.target.value)}
-                        className="w-full mb-3"
-                    />
-                    <label htmlFor="bpUsername">BP User Name</label>
-                    <InputText
-                        id="bpUsername"
-                        value={userUpdate.bpUsername}
-                        onChange={(e) => handleChange('bpUsername', e.target.value)}
-                        className="w-full mb-3"
-                    />
-                    <label htmlFor="bpPassword">BP Password</label>
-                    <InputText
-                        id="bpPassword"
-                        value={userUpdate.bpPassword}
-                        onChange={(e) => handleChange('bpPassword', e.target.value)}
-                        className="w-full mb-3"
-                    />
-
-                    <div className="flex align-items-center gap-4 mb-3">
-                        <Checkbox
-                            inputId="isAccepted"
-                            checked={userUpdate.isAccepted}
-                            onChange={(e) => handleChange('isAccepted', e.checked)}
-                        />
-                        <label htmlFor="isAccepted">Accepted</label>
-                    </div>
-
-                    <div className="flex align-items-center gap-4">
-                        <Checkbox
-                            inputId="isAdmin"
-                            checked={userUpdate.isAdmin}
-                            onChange={(e) => handleChange('isAdmin', e.checked)}
-                        />
-                        <label htmlFor="isAdmin">Admin</label>
-                    </div>
-                </div>
 
 
-            </Dialog>
 
-            <Dialog visible={deleteDialog} style={{ width: "450px" }} header="Confirm" modal footer={deleteDialogFooter} onHide={hideDeleteDuessDialog}>
-                <div className="flex align-items-center justify-content-center">
-                    <i className="pi pi-exclamation-triangle mr-3" style={{ fontSize: "2rem" }} />
-                    {userUpdate && <span>Are you sure you want to delete the  {userUpdate.displayName}?</span>}
-                </div>
-            </Dialog>
         </div>
     );
 };

@@ -18,11 +18,15 @@ const AppMenu = () => {
         },
         {
             label: '',
-            items: [{ label: 'Users', icon: 'pi pi-fw pi-users', to: '/pages/users' }]
+            items: [{ label: 'Users List', icon: 'pi pi-fw pi-users', to: '/pages/users' }]
         },
         {
             label: '',
-            items: [{ label: 'User Details', icon: 'pi pi-fw pi-user', to: '/pages/userdetails' }]
+            items: [{ label: 'Widthdrawal time', icon: 'pi pi-fw pi-users', to: '/pages/withdrawaltime' }]
+        },
+        {
+            label: '',
+            items: [{ label: 'User Details', icon: 'pi pi-fw pi-user', to: '/pages/userdetail' }]
         },
         {
             label: '',
@@ -30,7 +34,7 @@ const AppMenu = () => {
         },
         {
             label: '',
-            items: [{ label: 'Withdrawals', icon: 'pi pi-fw pi-upload', to: '/pages/withdrawals' }]
+            items: [{ label: 'Bank Info', icon: 'pi pi-fw pi-upload', to: '/pages/bankinfo' }]
         },
         {
             label: '',

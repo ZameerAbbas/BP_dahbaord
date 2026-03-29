@@ -243,6 +243,8 @@ const Withdrawals = () => {
                         loading={loading}
                         responsiveLayout="scroll"
                         emptyMessage="No withdrawals found."
+                        scrollable
+                        scrollHeight="60vh"
                     // pag
                     >
                         <Column field="createdAt" header="Date & Time" body={(rowData) => formatDate(rowData.createdAt)} style={{ minWidth: '14rem' }} />

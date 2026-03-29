@@ -144,7 +144,7 @@ const AppRightSidebar = () => {
 
                     <div className="">
                         {/* Deposits */}
-                        <Link href="/pages/users" onClick={(e) => opu.current?.toggle(e)}>
+                        <Link href="/pages/userdetails" onClick={(e) => opu.current?.toggle(e)}>
                             <div className="flex items-center gap-2 p-2 hover:bg-gray-100 rounded cursor-pointer">
                                 <i className="pi pi-download text-green-500"></i>
                                 <span>Pending Users ({pendingUsers?.length})</span>

@@ -248,6 +248,8 @@ const Deposits = () => {
                         loading={loading}
                         responsiveLayout="scroll"
                         emptyMessage="No deposits found."
+                        scrollable
+                        scrollHeight="60vh"
                     >
                         <Column field="createdAt" header="Date & Time" body={(rowData) => formatDate(rowData.createdAt)} style={{ minWidth: '14rem' }} />
                         <Column field="userName" header="Customer Name" filterPlaceholder="Search by name" style={{ minWidth: '12rem' }} />
