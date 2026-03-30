@@ -63,7 +63,7 @@ const Users = () => {
                             <option value="Active">Active</option>
                             <option value="Pending">Pending</option>
                         </select>
-                        <Button label="Go" icon="pi pi-arrow-right" className="p-button-sm" onClick={() => console.log('Filter applied')} />
+                        {/* <Button label="Go" icon="pi pi-arrow-right" className="p-button-sm" onClick={() => console.log('Filter applied')} /> */}
                     </div>
                 </div>
                 <div className="flex align-items-center gap-3">
@@ -160,12 +160,19 @@ const Users = () => {
     };
 
 
-    const displayUsers = users.filter(user =>
-        globalFilterValue === '' ||
-        user.displayName?.toLowerCase().includes(globalFilterValue.toLowerCase()) ||
-        user.email?.toLowerCase().includes(globalFilterValue.toLowerCase())
-    );
-
+    const displayUsers = users
+        .filter(user => {
+            if (statusFilter === 'Active') return user.isAccepted;
+            if (statusFilter === 'Pending') return !user.isAccepted;
+            return true;
+        })
+        .filter(user => {
+            return (
+                globalFilterValue === '' ||
+                user.displayName?.toLowerCase().includes(globalFilterValue.toLowerCase()) ||
+                user.email?.toLowerCase().includes(globalFilterValue.toLowerCase())
+            );
+        });
     return (
         <div className="grid">
             <div className="col-12">

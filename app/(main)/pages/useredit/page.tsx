@@ -51,7 +51,7 @@ export default function UserEditPage() {
         const { uid, ...updates } = user;
         await updateUser(uid, updates);
         localStorage.removeItem('userData');
-        router.push('/pages/users');
+        router.push('/pages/userdetails');
     };
 
     if (loading) return <div>Loading...</div>;

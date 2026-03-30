@@ -40,6 +40,10 @@ const AppMenu = () => {
             label: '',
             items: [{ label: 'Withdrawals', icon: 'pi pi-fw pi-upload', to: '/pages/withdrawals' }]
         },
+        {
+            label: '',
+            items: [{ label: 'Support', icon: 'pi pi-fw pi-phone', to: '/pages/support' }]
+        }
     ];
 
     return (

@@ -9,6 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { listenWithdrawalOrders, OrderType, updateOrderStatus } from '@/firebaseUtils';
 import { Dropdown } from 'primereact/dropdown';
 import { Dialog } from 'primereact/dialog';
+import { useRouter } from 'next/navigation';
 
 interface UserType {
     uid: string;
@@ -32,6 +33,8 @@ const Withdrawals = () => {
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [isDialogVisible, setIsDialogVisible] = useState(false);
     const [selectedStatus, setSelectedStatus] = useState<string>('');
+
+    const router = useRouter();
 
     const clearFilter = () => {
         initFilters();
@@ -201,8 +204,15 @@ const Withdrawals = () => {
 
     const handleApprove = async (order: OrderType) => {
         try {
-            await updateOrderStatus(order.uid, order.id, 'approved');
+            localStorage.setItem(
+                'orderInfo',
+                JSON.stringify({
+                    uid: order.uid,
+                    orderId: order.id
+                })
+            );
 
+            router.push('/pages/updatewithdrawals');
         } catch (error) {
             console.error('Error approving order:', error);
         }
@@ -224,6 +234,9 @@ const Withdrawals = () => {
     const filteredWithdrawals = selectedStatus
         ? withdrawals.filter(d => d.status === selectedStatus)
         : withdrawals;
+
+
+        console.log('Filtered Withdrawals:', filteredWithdrawals);
 
     return (
         <div className="grid">

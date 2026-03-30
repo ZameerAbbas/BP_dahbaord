@@ -115,9 +115,15 @@ const Banks = () => {
                         label="Add Bank"
                         icon="pi pi-plus"
                         className="p-button-success w-full md:w-auto"
+                        // disabled={banks.length === 3} // Disable if there are already 3 banks
                         onClick={() => {
-                            router.push(`/pages/cerateupdatebank`);
+                            localStorage.removeItem('bankId');
+                            if (banks.length === 3) {
+                                alert('Maximum of 3 banks allowed. Please delete an existing bank to add a new one.');
+                            } else
+                                router.push(`/pages/cerateupdatebank`);
                         }}
+                        title={banks.length >= 3 ? "Maximum of 3 banks allowed" : "Add a new bank"}
                     />
                 </div>
             </div>

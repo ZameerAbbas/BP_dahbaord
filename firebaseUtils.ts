@@ -15,6 +15,7 @@ import { ref, get, update, child,remove,onValue, set, push   } from 'firebase/da
     status: string;
     type: string;
     screenshot: string;
+    screenshotAdmin: string;
     updatedAt: string;
     displayName?: string;
     email?: string;
@@ -51,6 +52,10 @@ export interface bankInfoType {
     limit: number;
 
 }
+export interface supportType {
+    uid: string;
+    supportNumber: string;
+}
 
 export const getAllUsers = async () => {
   const usersRef = ref(db, 'users');
@@ -77,7 +82,7 @@ export const getUserByName = async (name: string) => {
   }));
 
 
-  const user = userList.find(u => u.displayName?.toLowerCase() === name.toLowerCase());
+  const user = userList.find(u => u.displayName?.toLowerCase() === name.toLowerCase() || u.userName?.toLowerCase() === name.toLowerCase());
 
   return user || null;
 };
@@ -247,6 +252,35 @@ export const updateOrderStatus = async (uid: string, orderId: string, newStatus:
 
 
 
+export const getOrderById = async (uid: string, orderId: string) => {
+    try {
+        const snapshot = await get(ref(db, `orders/${uid}/${orderId}`));
+
+        if (snapshot.exists()) {
+            return snapshot.val();
+        } else {
+            return null;
+        }
+    } catch (error) {
+        console.error('Error fetching order:', error);
+        throw error;
+    }
+};
+export const updateOrder = async (uid: string, orderId: string, data: OrderType) => {
+    try {
+
+           const orderRef = ref(db, `orders/${uid}/${orderId}`);
+        const { id, ...payload } = data;
+        payload.updatedAt = new Date().toISOString()
+
+        await update(orderRef, data);
+
+        console.log("Order updated successfully");
+    } catch (error) {
+        console.error("Error updating order:", error);
+        throw error;
+    }
+};
 export const createWithdrawalTime = async (data: withdrawalTimeType) => {
   try {
     const withdrawalRef = ref(db, "withdrawalTimes");
@@ -285,6 +319,47 @@ export const getAllWithdrawalTimes = async (): Promise<Record<string, withdrawal
 
 export const updateWithdrawalTime = async (uid: string, data: any) => {
   const refPath = ref(db, `withdrawalTimes/${uid}`);
+  await update(refPath, data);
+};
+
+export const createSupport = async (data: supportType) => {
+  try {
+    const supportRef = ref(db, "support");
+    const newRef = push(supportRef);
+
+    const payload = {
+      ...data,
+      uid: newRef.key,
+    };
+
+    await set(newRef, payload);
+
+    return payload;
+  } catch (error) {
+    console.error("Error creating support ticket:", error);
+    throw error;
+  }
+};
+
+export const getAllSupport = async (): Promise<Record<string, supportType>> => {
+  try {
+    const supportRef = ref(db, "support");
+    const snapshot = await get(supportRef);
+
+    if (snapshot.exists()) {
+      return snapshot.val();
+    }
+
+    return {};
+  } catch (error) {
+    console.error("Error fetching withdrawal times:", error);
+    throw error;
+  }
+};
+
+
+export const updateSupport = async (uid: string, data: any) => {
+  const refPath = ref(db, `support/${uid}`);
   await update(refPath, data);
 };
 
@@ -337,3 +412,5 @@ export const getBankById = async (uid: string) => {
 
   return null;
 };
+
+

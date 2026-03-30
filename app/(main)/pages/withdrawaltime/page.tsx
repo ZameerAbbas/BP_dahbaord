@@ -7,7 +7,8 @@ import { Button } from 'primereact/button';
 import {
     getAllWithdrawalTimes,
     createWithdrawalTime,
-    withdrawalTimeType
+    withdrawalTimeType,
+    updateWithdrawalTime
 } from '@/firebaseUtils';
 
 
@@ -49,8 +50,19 @@ const WithdrawalTiming = () => {
 
     // ✅ Submit / Update
     const handleSubmit = async () => {
+
         try {
-            await createWithdrawalTime(form);
+            if (isEdit && form.uid) {
+                // Update existing support
+                await updateWithdrawalTime(form.uid, form);
+                alert('Support number updated successfully');
+            } else {
+                // Create new support
+                const newSupport = await createWithdrawalTime(form);
+                setForm(newSupport);
+                alert('Support number created successfully');
+            }
+
             setIsEdit(true);
         } catch (err) {
             console.error(err);
@@ -68,7 +80,7 @@ const WithdrawalTiming = () => {
                 <div className="col-12 md:col-3">
                     <label>From Time</label>
                     <InputText
-                        value={form.fromtime}
+                        value={form?.fromtime}
                         onChange={(e) => handleChange('fromtime', e.target.value)}
                         placeholder="13:00"
                         className="w-full"
@@ -78,7 +90,7 @@ const WithdrawalTiming = () => {
                 <div className="col-12 md:col-3">
                     <label>To Time</label>
                     <InputText
-                        value={form.toTime}
+                        value={form?.toTime}
                         onChange={(e) => handleChange('toTime', e.target.value)}
                         placeholder="18:00"
                         className="w-full"
@@ -88,7 +100,7 @@ const WithdrawalTiming = () => {
                 <div className="col-12 md:col-3">
                     <label>WhatsApp Number</label>
                     <InputText
-                        value={form.WhatappNumber}
+                        value={form?.WhatappNumber}
                         onChange={(e) => handleChange('WhatappNumber', e.target.value)}
                         placeholder="+447..."
                         className="w-full"
@@ -98,7 +110,7 @@ const WithdrawalTiming = () => {
                 <div className="col-12 md:col-3">
                     <label>URL</label>
                     <InputText
-                        value={form.url}
+                        value={form?.url}
                         onChange={(e) => handleChange('url', e.target.value)}
                         placeholder="https://..."
                         className="w-full"
