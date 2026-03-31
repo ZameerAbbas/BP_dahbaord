@@ -223,13 +223,12 @@ const Deposits = () => {
 
     if (loading) return <div className="p-4 text-center">Loading deposits...</div>;
 
-    const filteredDeposits = selectedStatus
+    const filteredDeposits = (selectedStatus
         ? deposits.filter(d => d.status === selectedStatus)
-        : deposits;
+        : deposits
+    ).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-
-    console.log("filteredDeposits", filteredDeposits)
-
+    console.log("filteredDeposits", filteredDeposits);
     return (
         <div className="grid">
             <div className="col-12">

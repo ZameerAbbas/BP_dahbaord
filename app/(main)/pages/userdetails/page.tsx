@@ -122,11 +122,19 @@ const Users = () => {
 
 
 
-    const displayUsers = users.filter(user =>
-        globalFilterValue === '' ||
-        user.displayName?.toLowerCase().includes(globalFilterValue.toLowerCase()) ||
-        user.email?.toLowerCase().includes(globalFilterValue.toLowerCase())
-    );
+
+    const displayUsers = users
+        .filter(user =>
+            globalFilterValue === '' ||
+            user.displayName?.toLowerCase().includes(globalFilterValue.toLowerCase()) ||
+            user.email?.toLowerCase().includes(globalFilterValue.toLowerCase())
+        )
+        .sort((a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+
+    console.log('Display Users:', displayUsers);
+    console.log('Display Users:', displayUsers);
 
     return (
         <div className="grid">

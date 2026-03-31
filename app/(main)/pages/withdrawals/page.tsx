@@ -231,12 +231,12 @@ const Withdrawals = () => {
 
     if (loading) return <div className="p-4 text-center">Loading withdrawals...</div>;
 
-    const filteredWithdrawals = selectedStatus
+
+
+    const filteredWithdrawals = (selectedStatus
         ? withdrawals.filter(d => d.status === selectedStatus)
-        : withdrawals;
-
-
-        console.log('Filtered Withdrawals:', filteredWithdrawals);
+        : withdrawals
+    ).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
     return (
         <div className="grid">
