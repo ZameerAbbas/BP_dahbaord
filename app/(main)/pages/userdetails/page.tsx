@@ -170,10 +170,13 @@ const Users = () => {
                         scrollable
                         scrollHeight="60vh"
 
+
                         selection={selectedUsers}
                         onSelectionChange={(e: { value: UserType[] }) => setSelectedUsers(e.value)}
                     >
-                        <Column selectionMode="multiple" headerStyle={{ width: '3rem' }} />
+                        <Column selectionMode="multiple" headerStyle={{ width: '3rem' }}
+                        className=''
+                        />
                         <Column field="displayName" header="Name" filterPlaceholder="Search by name"
                             body={(rowData) => (
                                 <span
@@ -183,11 +186,14 @@ const Users = () => {
                                     {rowData.displayName}
                                 </span>
                             )}
-                            style={{ minWidth: '8rem' }} />
-                        <Column field="phoneNumber" header="Phone " filterPlaceholder="Search by phoneNumber" style={{ minWidth: '8rem' }} />
-                        <Column field="bpUsername" header="BP Username" filterPlaceholder="Search by bpUsername" style={{ minWidth: '8rem' }} />
-                        <Column field="bpPassword" header="BP Password" filterPlaceholder="Search by bpPassword" style={{ minWidth: '8rem' }} />
-                        <Column field="isAccepted" header="Status" body={isAcceptedBodyTemplate} style={{ minWidth: '8rem' }} />
+                            style={{ minWidth: '8rem' }}
+                            className='bg-yellow-500 border-b border-white  '
+                            />
+                        <Column field="phoneNumber" header="Phone " filterPlaceholder="Search by phoneNumber" style={{ minWidth: '8rem' }} className='bg-yellow-500' />
+                        <Column field="bpUsername" header="BP Username" filterPlaceholder="Search by bpUsername" style={{ minWidth: '8rem' }} className='bg-yellow-500' />
+                        <Column field="bpPassword" header="BP Password" filterPlaceholder="Search by bpPassword" style={{ minWidth: '8rem' }} className='bg-yellow-500' />
+                        <Column field="isAccepted" header="Status" body={isAcceptedBodyTemplate} style={{ minWidth: '8rem' }} className='bg-yellow-500
+                        ' />
                     </DataTable>
                 </div>
             </div>

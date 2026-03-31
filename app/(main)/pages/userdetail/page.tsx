@@ -85,15 +85,19 @@ const UserSearchPage = () => {
                             scrollable
                             scrollHeight="50vh"
                         >
-                            <Column field="displayName" header="Name" style={{ minWidth: '8rem' }} />
-                            <Column field="email" header="Email" style={{ minWidth: '10rem' }} />
-                            <Column field="phoneNumber" header="Phone" style={{ minWidth: '8rem' }} />
-                            <Column field="bpUsername" header="BP Username" style={{ minWidth: '8rem' }} />
-                            <Column field="bpPassword" header="BP Password" style={{ minWidth: '8rem' }} />
-                            <Column field="isAccepted" header="Status" body={isAcceptedBodyTemplate} style={{ minWidth: '8rem' }} />
+                            <Column field="displayName" header="Name" style={{ minWidth: '8rem' }}
+
+                                className='border-b border-gray-500'
+                            />
+                            <Column field="email" header="Email" style={{ minWidth: '10rem' }}  className='border-b border-gray-500'/>
+                            <Column field="phoneNumber" header="Phone" style={{ minWidth: '8rem' }} className='border-b border-gray-500' />
+                            <Column field="bpUsername" header="BP Username" style={{ minWidth: '8rem' }}  className='border-b border-gray-500'/>
+                            <Column field="bpPassword" header="BP Password" style={{ minWidth: '8rem' }}  className='border-b border-gray-500'/>
+                            <Column field="isAccepted" header="Status" body={isAcceptedBodyTemplate} style={{ minWidth: '8rem' }}  className='border-b border-gray-500'/>
                             <Column
                                 header="Action"
                                 style={{ minWidth: '12rem' }}
+                                className='border-b border-gray-500'
                                 body={(rowData: UserType) => (
                                     <div className="flex gap-2">
                                         <Button

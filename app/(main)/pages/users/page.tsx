@@ -49,26 +49,28 @@ const Users = () => {
                 : users.filter(u => !u.isAccepted);
 
         return (
-            <div className="flex flex-row   justify-between items-center gap-3">
-                <div className="flex align-items-center gap-3 flex-wrap">
-                    <div className="flex align-items-center gap-2">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-6 w-full">
+                {/* Bulk Status */}
+                <div className="flex flex-col sm:flex-roe items-start sm:items-center gap-3 flex-wrap w-full sm:w-auto">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
                         <label className="font-semibold">Bulk Status:</label>
                         <select
                             value={statusFilter}
                             onChange={(e) => setStatusFilter(e.target.value)}
-                            className="p-2 border-1 surface-border border-round"
-                            style={{ minWidth: '150px', padding: '0.5rem 0.75rem' }}
+                            className="p-2 border border-gray-300 rounded-md w-full sm:w-auto"
+                            style={{ minWidth: '150px' }}
                         >
                             <option value="All">All</option>
                             <option value="Active">Active</option>
                             <option value="Pending">Pending</option>
                         </select>
-                        {/* <Button label="Go" icon="pi pi-arrow-right" className="p-button-sm" onClick={() => console.log('Filter applied')} /> */}
                     </div>
                 </div>
-                <div className="flex align-items-center gap-3">
+
+                {/* Name Search */}
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
                     <label className="font-semibold">Name Search:</label>
-                    <span className="p-input-icon-left" style={{ flex: 1, maxWidth: '350px' }}>
+                    <span className="p-input-icon-left w-full sm:w-auto flex-1">
                         <i className="pi pi-search" />
                         <InputText
                             value={globalFilterValue}
@@ -78,6 +80,7 @@ const Users = () => {
                         />
                     </span>
                 </div>
+
             </div>
         );
     };
@@ -160,19 +163,43 @@ const Users = () => {
     };
 
 
+    const formatDate = (dateString: string) => {
+        if (!dateString) return '';
+        return new Date(dateString).toLocaleDateString('en-US', {
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit'
+        });
+    };
+
+
     const displayUsers = users
         .filter(user => {
+            // Your existing Status Filter
             if (statusFilter === 'Active') return user.isAccepted;
             if (statusFilter === 'Pending') return !user.isAccepted;
             return true;
         })
         .filter(user => {
+            // Your existing Global Filter
             return (
                 globalFilterValue === '' ||
                 user.displayName?.toLowerCase().includes(globalFilterValue.toLowerCase()) ||
                 user.email?.toLowerCase().includes(globalFilterValue.toLowerCase())
             );
+        })
+        .sort((a, b) => {
+            // Sort by Date (Newest First)
+            // Convert ISO strings to numbers for comparison
+            const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+            const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+
+            return dateB - dateA; // Use 'dateA - dateB' for Oldest First
         });
+
+    console.log('Filtered Users:', displayUsers);
     return (
         <div className="grid">
             <div className="col-12">
@@ -209,13 +236,16 @@ const Users = () => {
                         scrollable
                         scrollHeight="60vh"
                     >
-                        <Column field="displayName" header="Name" filterPlaceholder="Search by name" style={{ minWidth: '12rem' }} />
-                        <Column field="email" header="Email" filterPlaceholder="Search by email" style={{ minWidth: '15rem' }} />
-                        <Column field="phoneNumber" header="Phone Number" filterPlaceholder="Search by phoneNumber" style={{ minWidth: '15rem' }} />
-                        <Column field="bpUsername" header="BP Username" filterPlaceholder="Search by bpUsername" style={{ minWidth: '15rem' }} />
-                        <Column field="bpPassword" header="BP Password" filterPlaceholder="Search by bpPassword" style={{ minWidth: '15rem' }} />
-                        <Column field="isAccepted" header="Active" body={isAcceptedBodyTemplate} style={{ minWidth: '8rem' }} />
-                        <Column header="Action" body={actionBodyTemplate} headerStyle={{ minWidth: "13rem" }}></Column>
+                        <Column field="createdAt" header="Date & Time" body={(rowData) => formatDate(rowData.createdAt)} style={{ minWidth: '14rem' }}
+                            className='border-b border-gray-500'
+                        />
+                        <Column field="displayName" header="Name" filterPlaceholder="Search by name" style={{ minWidth: '12rem' }} className='border-b border-gray-500' />
+                        <Column field="email" header="Email" filterPlaceholder="Search by email" style={{ minWidth: '15rem' }} className='border-b border-gray-500' />
+                        <Column field="phoneNumber" header="Phone Number" filterPlaceholder="Search by phoneNumber" style={{ minWidth: '15rem' }} className='border-b border-gray-500' />
+                        <Column field="bpUsername" header="BP Username" filterPlaceholder="Search by bpUsername" style={{ minWidth: '15rem' }} className='border-b border-gray-500' />
+                        <Column field="bpPassword" header="BP Password" filterPlaceholder="Search by bpPassword" style={{ minWidth: '15rem' }} className='border-b border-gray-500' />
+                        <Column field="isAccepted" header="Active" body={isAcceptedBodyTemplate} style={{ minWidth: '8rem' }} className='border-b border-gray-500' />
+                        <Column header="Action" body={actionBodyTemplate} headerStyle={{ minWidth: "13rem" }} className='border-b border-gray-500'></Column>
                     </DataTable>
                 </div>
             </div>

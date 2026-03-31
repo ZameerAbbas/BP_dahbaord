@@ -2,16 +2,24 @@
 .p-datatable .p-datatable-thead > tr > th {
     background-color: white !important; /* White header */
     color: black; /* Text color */
-    // border: 1px solid transparent !important; /* Transparent borders */
+    border: none !important; /* Remove default borders */
+    border-bottom: 1px solid #FFFF !important; /* Column border */
 }
 
 .p-datatable .p-datatable-tbody > tr > td {
     background-color: white; /* White cells */
     color: black; /* Text color */
-    // border: 1px solid transparent; /* Transparent cell borders */
+    border: none; /* Remove default row borders */
+    border-bottom: 1px solid #FFFF; /* Column border */
 }
 
-/* Optional: Remove hover background color */
+/* Remove hover background if desired */
 .p-datatable .p-datatable-tbody > tr:hover > td {
-    background-color: #f9f9f9; /* Or white if you don't want hover effect */
+    background-color: #f9f9f9; /* subtle hover, or white */
+}
+
+/* Remove last column border */
+.p-datatable .p-datatable-tbody > tr > td:last-child,
+.p-datatable .p-datatable-thead > tr > th:last-child {
+
 }

@@ -12,7 +12,8 @@ import {
     createUserWithEmailAndPassword,
     setPersistence,
     browserLocalPersistence,
-    browserSessionPersistence
+    browserSessionPersistence,
+    updateProfile
 } from 'firebase/auth';
 import { ref, set } from 'firebase/database';
 import { auth, db } from '../../firebase';
@@ -46,11 +47,15 @@ const SignUpPage = () => {
             await setPersistence(auth, checked ? browserLocalPersistence : browserSessionPersistence);
 
             if (isSignup) {
-                // 🔥 SIGN UP
                 const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
-                // Save in DB
+                // ✅ SET displayName in Firebase Auth
+                await updateProfile(user, {
+                    displayName: displayName
+                });
+
+                // ✅ Save in Realtime DB
                 await set(ref(db, `users/${user.uid}`), {
                     uid: user.uid,
                     email,

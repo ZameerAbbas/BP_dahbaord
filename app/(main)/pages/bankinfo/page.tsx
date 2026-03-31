@@ -76,19 +76,18 @@ const Banks = () => {
         );
     };
 
-    // ✅ Action Buttons
     const actionTemplate = (row: bankInfoType) => {
         return (
             <div className="flex gap-2">
                 <Button
-                    label={'Edit'}
+
                     icon="pi pi-pencil"
-                    className="p-button-sm p-button-warning"
+                    className="p-button-sm bg-[#0F1D41] text-white hover:bg-[#0F1D49]"
                     onClick={() => handleEdit(row)}
                 />
 
                 <Button
-                    label="Delete"
+
                     icon="pi pi-trash"
                     className="p-button-sm p-button-danger"
                     onClick={() => handleDelete(row)}
@@ -118,11 +117,12 @@ const Banks = () => {
                         // disabled={banks.length === 3} // Disable if there are already 3 banks
                         onClick={() => {
                             localStorage.removeItem('bankId');
-                            if (banks.length === 3) {
-                                alert('Maximum of 3 banks allowed. Please delete an existing bank to add a new one.');
-                            } else
-                                router.push(`/pages/cerateupdatebank`);
-                        }}
+                            // if (banks.length === 3) {
+                            //     alert('Maximum of 3 banks allowed. Please delete an existing bank to add a new one.');
+                            // } else
+                            router.push(`/pages/cerateupdatebank`);
+                        }
+                        }
                         title={banks.length >= 3 ? "Maximum of 3 banks allowed" : "Add a new bank"}
                     />
                 </div>
@@ -133,12 +133,18 @@ const Banks = () => {
                 scrollable
                 scrollHeight="60vh"
             >
-                <Column field="bankName" header="Bank Name" />
-                <Column field="accountTitle" header="Account Title" />
-                <Column field="accountNumber" header="Account Number" />
-                <Column field="category" header="Category" />
-                <Column header="Status" body={statusTemplate} />
-                <Column header="Actions" body={actionTemplate} />
+                <Column field="bankName" header="Bank Name" className='border-b-2 border-gray-500' />
+                <Column field="accountTitle" header="Account Title" className='border-b-2 border-gray-500' />
+                <Column field="accountNumber" header="Account Number" className='border-b-2 border-gray-500' />
+                <Column field="category" header="Category"
+                    body={(row: bankInfoType) => (
+                        <p className="bg-green-500 rounded-full text-white px-2 py-1 inline-block">
+                            {row.category}
+                        </p>
+                    )}
+                    className='border-b-2 border-gray-500 ' />
+                <Column header="Status" body={statusTemplate} className='border-b-2 border-gray-500' />
+                <Column header="Actions" body={actionTemplate} className='border-b-2 border-gray-500' />
             </DataTable>
         </div>
     );

@@ -250,14 +250,14 @@ const Deposits = () => {
                         scrollable
                         scrollHeight="60vh"
                     >
-                        <Column field="createdAt" header="Date & Time" body={(rowData) => formatDate(rowData.createdAt)} style={{ minWidth: '14rem' }} />
-                        <Column field="userName" header="Customer Name" filterPlaceholder="Search by name" style={{ minWidth: '12rem' }} />
-                        <Column field="accountNumber" header="Phone" style={{ minWidth: '12rem' }} />
-                        <Column field="amount" header="Amount" body={amountBodyTemplate} style={{ minWidth: '10rem' }} />
-                        <Column field="bpId" header="BP Username" style={{ minWidth: '12rem' }} />
-                        <Column field="screenshot" header="Attachment" body={imageBodyTemplate} style={{ minWidth: '10rem' }} />
-                        <Column field="status" header="Status" body={statusBodyTemplate} style={{ minWidth: '10rem' }} />
-                        <Column header="Action" body={actionBodyTemplate} style={{ minWidth: '16rem' }} />
+                        <Column field="createdAt" header="Date & Time" body={(rowData) => formatDate(rowData.createdAt)} style={{ minWidth: '14rem' }} className='border-b-2 border-gray-500' />
+                        <Column field="userName" header="Customer Name" filterPlaceholder="Search by name" style={{ minWidth: '12rem' }} className='border-b-2 border-gray-500' />
+                        <Column field="accountNumber" header="Phone" style={{ minWidth: '12rem' }} className='border-b-2 border-gray-500' />
+                        <Column field="amount" header="Amount" body={amountBodyTemplate} style={{ minWidth: '10rem' }} className='border-b-2 border-gray-500' />
+                        <Column field="bpId" header="BP Username" style={{ minWidth: '12rem' }} className='border-b-2 border-gray-500' />
+                        <Column field="screenshot" header="Attachment" body={imageBodyTemplate} style={{ minWidth: '10rem' }} className='border-b-2 border-gray-500' />
+                        <Column field="status" header="Status" body={statusBodyTemplate} style={{ minWidth: '10rem' }} className='border-b-2 border-gray-500' />
+                        <Column header="Action" body={actionBodyTemplate} style={{ minWidth: '16rem' }} className='border-b-2 border-gray-500' />
                     </DataTable>
 
                     <Dialog
