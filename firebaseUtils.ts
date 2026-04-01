@@ -18,6 +18,9 @@ import { ref, get, update, child,remove,onValue, set, push   } from 'firebase/da
     screenshotAdmin: string;
     updatedAt: string;
     displayName?: string;
+    userName?: string;
+    bpId?: string;
+    bpPassword?: string;
     email?: string;
 }
 
@@ -199,6 +202,31 @@ export const listenDepositOrdersPending = (callback: (deposits: OrderType[]) => 
 
   return () => unsubscribe(); // Call this to stop listening
 };
+export const listenDepositOrdersPendingByUserID = (
+  userId: string,
+  callback: (deposits: OrderType[]) => void
+) => {
+  const userOrdersRef = ref(db, `orders/${userId}`); // ✅ direct path
+
+  const unsubscribe = onValue(userOrdersRef, (snapshot) => {
+    const ordersObj = snapshot.val() || {};
+
+    const depositsList: OrderType[] = Object.entries(ordersObj)
+      .map(([orderId, order]: [string, any]) => ({
+        id: orderId,
+        uid: userId,
+        ...order,
+      }))
+      .filter(
+        (order: OrderType) =>
+          order.isDeposit === true && order.status === "pending"
+      );
+
+    callback(depositsList);
+  });
+
+  return () => unsubscribe();
+};
 
 // Get all withdrawal orders
 export const listenWithdrawalOrders = (callback: (withdrawals: OrderType[]) => void) => {
@@ -242,6 +270,32 @@ export const listenWithdrawalOrdersPending = (callback: (withdrawals: OrderType[
   });
 
   return () => unsubscribe(); // Call this to stop listening
+};
+
+export const listenWithdrawalOrdersPendingByUserID = (
+  userId: string,
+  callback: (withdrawals: OrderType[]) => void
+) => {
+  const userOrdersRef = ref(db, `orders/${userId}`); // ✅ direct path
+
+  const unsubscribe = onValue(userOrdersRef, (snapshot) => {
+    const ordersObj = snapshot.val() || {};
+
+    const withdrawalsList: OrderType[] = Object.entries(ordersObj)
+      .map(([orderId, order]: [string, any]) => ({
+        id: orderId,
+        uid: userId,
+        ...order,
+      }))
+      .filter(
+        (order: OrderType) =>
+          order.isDeposit === false && order.status === "pending"
+      );
+
+    callback(withdrawalsList);
+  });
+
+  return () => unsubscribe();
 };
 
 export const updateOrderStatus = async (uid: string, orderId: string, newStatus: string) => {

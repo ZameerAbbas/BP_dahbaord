@@ -175,20 +175,24 @@ const Users = () => {
                         onSelectionChange={(e: { value: UserType[] }) => setSelectedUsers(e.value)}
                     >
                         <Column selectionMode="multiple" headerStyle={{ width: '3rem' }}
-                        className=''
+                            className=''
                         />
                         <Column field="displayName" header="Name" filterPlaceholder="Search by name"
                             body={(rowData) => (
                                 <span
-                                    style={{ color: '#007bff', textDecoration: 'underline', cursor: 'pointer' }}
-                                    onClick={() => editLatePayments(rowData)}
+
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        editLatePayments(rowData);
+                                    }}
+                                    className=' border-b border-white  underline pointer text-yellow-500 '
                                 >
                                     {rowData.displayName}
                                 </span>
                             )}
                             style={{ minWidth: '8rem' }}
-                            className='bg-yellow-500 border-b border-white  '
-                            />
+                            className=' border-b border-white  '
+                        />
                         <Column field="phoneNumber" header="Phone " filterPlaceholder="Search by phoneNumber" style={{ minWidth: '8rem' }} className='bg-yellow-500' />
                         <Column field="bpUsername" header="BP Username" filterPlaceholder="Search by bpUsername" style={{ minWidth: '8rem' }} className='bg-yellow-500' />
                         <Column field="bpPassword" header="BP Password" filterPlaceholder="Search by bpPassword" style={{ minWidth: '8rem' }} className='bg-yellow-500' />

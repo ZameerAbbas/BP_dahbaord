@@ -7,7 +7,7 @@ import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 import { Dropdown } from 'primereact/dropdown';
 
-import { updateUser, UserType } from '@/firebaseUtils';
+import { listenDepositOrdersPendingByUserID, listenWithdrawalOrdersPendingByUserID, OrderType, updateOrder, updateUser, UserType } from '@/firebaseUtils';
 
 const statusOptions = [
     { label: 'Approved', value: 'Approve' }, // Matches "Approved" in the image
@@ -17,7 +17,7 @@ const statusOptions = [
 
 export default function UserEditPage() {
     const router = useRouter();
-
+    const [errors, setErrors] = useState<any>({});
     const [user, setUser] = useState<UserType>({
         uid: '',
         email: '',
@@ -31,6 +31,9 @@ export default function UserEditPage() {
         phoneNumber: '',
         updatedAt: null
     });
+
+    const [depositOrders, setDepositOrders] = useState<OrderType[]>([]);
+    const [withdrawalOrders, setWithdrawalOrders] = useState<OrderType[]>([]);
 
     const [loading, setLoading] = useState(true);
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -47,9 +50,88 @@ export default function UserEditPage() {
         setUser(prev => ({ ...prev, [field]: value }));
     };
 
+
+    useEffect(() => {
+        const data = localStorage.getItem('userData');
+
+        if (data) {
+            const parsedUser = JSON.parse(data);
+            setUser(parsedUser);
+            const unsubscribeDeposits = listenDepositOrdersPendingByUserID(
+                parsedUser.uid,
+                setDepositOrders
+            );
+            const unsubscribeWithdrawals = listenWithdrawalOrdersPendingByUserID(
+                parsedUser.uid,
+                setWithdrawalOrders
+            )
+            return () => {
+                unsubscribeDeposits();
+                unsubscribeWithdrawals();
+            };
+        }
+
+        setLoading(false);
+    }, []);
+
+
+
+
+    const validate = () => {
+        const newErrors: any = {};
+
+        if (!user.displayName?.trim()) newErrors.displayName = "Display Name is required";
+        if (!user.userName?.trim()) newErrors.userName = "User Name is required";
+        if (!user.bpUsername?.trim()) newErrors.bpUsername = "BP Username is required";
+        if (!user.bpPassword?.trim()) newErrors.bpPassword = "BP Password is required";
+        if (!user.phoneNumber?.trim()) newErrors.phoneNumber = "Phone Number is required";
+
+        setErrors(newErrors);
+
+        return Object.keys(newErrors).length === 0;
+    };
+
+
+
+    console.log('Deposit Orders:', depositOrders);
+    console.log('Withdrawal Orders:', withdrawalOrders);
+
+
+
+
+
+
+    const updateOrdersWithUserData = async () => {
+        if (!user?.uid) return;
+
+        try {
+            const allOrders = [...depositOrders, ...withdrawalOrders];
+
+            const updates = allOrders.map((order) =>
+                updateOrder(user.uid, order.id, {
+                    ...order,
+                    userName: user.displayName,
+                    bpId: user.bpUsername,
+                    bpPassword: user.bpPassword
+                })
+            );
+
+            await Promise.all(updates);
+
+            console.log("All orders updated with latest user data");
+        } catch (error) {
+            console.error("Error updating orders:", error);
+        }
+    };
+
+
+
     const saveHandle = async () => {
+
+        if (!validate()) return;
         const { uid, ...updates } = user;
         await updateUser(uid, updates);
+        updateOrdersWithUserData()
         localStorage.removeItem('userData');
         router.push('/pages/userdetails');
     };
@@ -67,17 +149,21 @@ export default function UserEditPage() {
                         <label className="block font-medium mb-2">Name</label>
                         <InputText
                             value={user.displayName}
-                            onChange={(e) => handleChange('displayName', e.target.value)}
-                            placeholder="name.."
+                            onChange={(e) => handleChange("displayName", e.target.value)}
+                            className={`w-full ${errors.displayName ? 'border-red-500' : ''}`}
                         />
+                        {errors.displayName && (
+                            <small className="text-red-500">{errors.displayName}</small>
+                        )}
                     </div>
                     <div className="col-12 md:col-4">
                         <label className="block font-medium mb-2">Phone</label>
                         <InputText
                             value={user.phoneNumber}
-                            onChange={(e) => handleChange('phoneNumber', e.target.value)}
-                            placeholder="phone.."
+                            onChange={(e) => handleChange("phoneNumber", e.target.value)}
+                            className={`w-full ${errors.phoneNumber ? 'border-red-500' : ''}`}
                         />
+                        {errors.phoneNumber && <small className="text-red-500">{errors.phoneNumber}</small>}
                     </div>
 
                     {/* Row 2: User Name (Full Width in its row based on image) */}
@@ -85,9 +171,10 @@ export default function UserEditPage() {
                         <label className="block font-medium mb-2">User Name</label>
                         <InputText
                             value={user.userName}
-                            onChange={(e) => handleChange('userName', e.target.value)}
-                            placeholder="username.."
+                            onChange={(e) => handleChange("userName", e.target.value)}
+                            className={`w-full ${errors.userName ? 'border-red-500' : ''}`}
                         />
+                        {errors.userName && <small className="text-red-500">{errors.userName}</small>}
                     </div>
                     <div className="col-12 md:col-4"></div> {/* Spacer to keep username left-aligned */}
 
@@ -104,19 +191,22 @@ export default function UserEditPage() {
                         <label className="block font-medium mb-2">BP Username</label>
                         <InputText
                             value={user.bpUsername}
-                            onChange={(e) => handleChange('bpUsername', e.target.value)}
-                            placeholder="bpUsername.."
+                            onChange={(e) => handleChange("bpUsername", e.target.value)}
+                            className={`w-full ${errors.bpUsername ? 'border-red-500' : ''}`}
                         />
+                        {errors.bpUsername && <small className="text-red-500">{errors.bpUsername}</small>}
                     </div>
 
                     {/* Row 4: BP Password & Status */}
                     <div className="col-12 md:col-8">
                         <label className="block font-medium mb-2">BP Password</label>
                         <InputText
+                            type="password"
                             value={user.bpPassword}
-                            onChange={(e) => handleChange('bpPassword', e.target.value)}
-                            placeholder="bpPassword.."
+                            onChange={(e) => handleChange("bpPassword", e.target.value)}
+                            className={`w-full ${errors.bpPassword ? 'border-red-500' : ''}`}
                         />
+                        {errors.bpPassword && <small className="text-red-500">{errors.bpPassword}</small>}
                     </div>
                     <div className="col-12 md:col-4">
                         <label className="block font-medium mb-2">Status</label>

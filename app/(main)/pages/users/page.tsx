@@ -41,6 +41,9 @@ const Users = () => {
         setGlobalFilterValue(value);
     };
 
+
+    console.log('Current Filters:', users);
+
     const renderHeader = () => {
         const filteredUsers = statusFilter === 'All'
             ? users

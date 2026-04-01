@@ -66,12 +66,17 @@ import { LayoutContext } from './context/layoutcontext';
 import { useRouter } from 'next/navigation';
 import { Avatar } from 'primereact/avatar';
 
+import { OverlayPanel } from 'primereact/overlaypanel';
+
 const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
     const { layoutConfig, layoutState, onMenuToggle, showProfileSidebar, logout, currentUser } = useContext(LayoutContext);
     const router = useRouter();
     const menubuttonRef = useRef(null);
     const topbarmenuRef = useRef(null);
     const topbarmenubuttonRef = useRef(null);
+
+    const op = useRef<OverlayPanel>(null);
+
 
     const handleLogout = async () => {
         await logout();
@@ -141,10 +146,34 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
                     />
                 </div>
 
-                <button type="button" className="p-link layout-topbar-button" onClick={handleLogout}>
+
+
+                <button
+                    type="button"
+                    className="p-link layout-topbar-button"
+                    onClick={(e) => op.current?.toggle(e)} // show/hide on click
+                >
                     <i className="pi pi-sign-out"></i>
                     <span>Logout</span>
                 </button>
+
+                <OverlayPanel
+                    ref={op}
+                    showCloseIcon={false}
+                    dismissable={true}    // click outside to close
+                    id="overlay_logout"
+                    style={{ padding: '0.5rem 1rem', borderRadius: '0.5rem' }}
+                >
+                    <button
+                        className="p-button p-button-sm p-button-warning w-full"
+                        onClick={() => {
+                            handleLogout();
+                            op.current?.hide(); // hide after logout
+                        }}
+                    >
+                        Click to Logout
+                    </button>
+                </OverlayPanel>
             </div>
         </div>
     );
