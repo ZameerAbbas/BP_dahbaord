@@ -10,6 +10,7 @@ import {
     withdrawalTimeType,
     updateWithdrawalTime
 } from '@/firebaseUtils';
+import { Calendar } from 'primereact/calendar';
 
 
 
@@ -48,7 +49,39 @@ const WithdrawalTiming = () => {
         setForm({ ...form, [field]: value });
     };
 
-    // ✅ Submit / Update
+
+
+    // ✅ Convert "02:59 PM" string from Firebase back to JS Date for the Calendar
+    const stringToDate = (timeString: string) => {
+        if (!timeString) return null;
+
+        // This regex splits the time and the AM/PM part
+        const match = timeString.match(/(\d+):(\d+)\s*(AM|PM)/i);
+        if (!match) return null;
+
+        let [, hours, minutes, modifier] = match;
+        let h = parseInt(hours);
+
+        // Convert to 24h internally just for the JS Date object
+        if (modifier.toUpperCase() === 'PM' && h < 12) h += 12;
+        if (modifier.toUpperCase() === 'AM' && h === 12) h = 0;
+
+        const date = new Date();
+        date.setHours(h, parseInt(minutes), 0);
+        return date;
+    };
+
+    // ✅ Convert JS Date to "02:59 PM" string for Firebase
+    const dateToString = (date: Date | null) => {
+        if (!date) return '';
+        // hour12: true ensures it returns AM/PM
+        return date.toLocaleTimeString('en-US', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        });
+    };
+
     const handleSubmit = async () => {
 
         try {
@@ -71,6 +104,8 @@ const WithdrawalTiming = () => {
 
     if (loading) return <div>Loading...</div>;
 
+    console.log('Current Form State:', form);
+
     return (
         <div className="card">
             <h3 className="mb-4 text-xl font-bold">Withdrawals Timing</h3>
@@ -78,22 +113,26 @@ const WithdrawalTiming = () => {
             <div className="grid">
 
                 <div className="col-12 md:col-3">
-                    <label>From Time</label>
-                    <InputText
-                        value={form?.fromtime}
-                        onChange={(e) => handleChange('fromtime', e.target.value)}
-                        placeholder="13:00"
-                        className="w-full"
+                    <label className="block font-bold mb-2">From Time</label>
+                    <Calendar
+                        value={stringToDate(form.fromtime)}
+                        onChange={(e) => setForm({ ...form, fromtime: dateToString(e.value as Date) })}
+                        timeOnly
+                        hourFormat="12"
+                        placeholder="Select Start Time"
+                        showIcon
                     />
                 </div>
 
                 <div className="col-12 md:col-3">
-                    <label>To Time</label>
-                    <InputText
-                        value={form?.toTime}
-                        onChange={(e) => handleChange('toTime', e.target.value)}
-                        placeholder="18:00"
-                        className="w-full"
+                    <label className="block font-bold mb-2">To Time</label>
+                    <Calendar
+                        value={stringToDate(form.toTime)}
+                        onChange={(e) => setForm({ ...form, toTime: dateToString(e.value as Date) })}
+                        timeOnly
+                        hourFormat="12"
+                        placeholder="Select End Time"
+                        showIcon
                     />
                 </div>
 
