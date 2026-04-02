@@ -6,14 +6,12 @@ import { DataTable, DataTableFilterMeta } from 'primereact/datatable';
 import { InputText } from 'primereact/inputtext';
 import { classNames } from 'primereact/utils';
 import React, { useEffect, useState, useRef } from 'react';
-import { getAllUsers, updateUserStatus, UserType, } from '@/firebaseUtils';;
-import { Toast } from "primereact/toast";
+import { deleteUser, getAllUsers, updateUserStatus, UserType } from '@/firebaseUtils';
+import { Toast } from 'primereact/toast';
 import { useRouter } from 'next/navigation';
-
 
 const Users = () => {
     const [users, setUsers] = useState<UserType[]>([]);
-
 
     const [loading, setLoading] = useState(true);
     const [filters, setFilters] = useState<DataTableFilterMeta>({});
@@ -28,8 +26,6 @@ const Users = () => {
         initFilters();
     };
 
-
-
     const router = useRouter();
 
     const onGlobalFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -41,15 +37,10 @@ const Users = () => {
         setGlobalFilterValue(value);
     };
 
-
     console.log('Current Filters:', users);
 
     const renderHeader = () => {
-        const filteredUsers = statusFilter === 'All'
-            ? users
-            : statusFilter === 'Active'
-                ? users.filter(u => u.isAccepted)
-                : users.filter(u => !u.isAccepted);
+        const filteredUsers = statusFilter === 'All' ? users : statusFilter === 'Active' ? users.filter((u) => u.isAccepted) : users.filter((u) => !u.isAccepted);
 
         return (
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-6 w-full">
@@ -57,15 +48,11 @@ const Users = () => {
                 <div className="flex flex-col sm:flex-roe items-start sm:items-center gap-3 flex-wrap w-full sm:w-auto">
                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
                         <label className="font-semibold">Bulk Status:</label>
-                        <select
-                            value={statusFilter}
-                            onChange={(e) => setStatusFilter(e.target.value)}
-                            className="p-2 border border-gray-300 rounded-md w-full sm:w-auto"
-                            style={{ minWidth: '150px' }}
-                        >
+                        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="p-2 border border-gray-300 rounded-md w-full sm:w-auto" style={{ minWidth: '150px' }}>
                             <option value="All">All</option>
                             <option value="Active">Active</option>
                             <option value="Pending">Pending</option>
+                            <option value="Rejected">Rejected</option>
                         </select>
                     </div>
                 </div>
@@ -75,15 +62,9 @@ const Users = () => {
                     <label className="font-semibold">Name Search:</label>
                     <span className="p-input-icon-left w-full sm:w-auto flex-1">
                         <i className="pi pi-search" />
-                        <InputText
-                            value={globalFilterValue}
-                            onChange={onGlobalFilterChange}
-                            placeholder="Search by name..."
-                            className="w-full"
-                        />
+                        <InputText value={globalFilterValue} onChange={onGlobalFilterChange} placeholder="Search by name..." className="w-full" />
                     </span>
                 </div>
-
             </div>
         );
     };
@@ -104,25 +85,15 @@ const Users = () => {
         setGlobalFilterValue('');
     };
 
-
-
     const isAcceptedBodyTemplate = (rowData: UserType) => {
-        return (
-            <i
-                className={classNames('pi', {
-                    'text-green-500 pi-check-circle': rowData.isAccepted,
-                    'text-pink-500 pi-times-circle': !rowData.isAccepted
-                })}
-            ></i>
-        );
+        return <span>{rowData.isAccepted ? 'Approved' : rowData.isReject ? 'Rejected' : 'Pending'}</span>;
     };
-
 
     const loadUsers = async () => {
         const usersObj = await getAllUsers();
         const userList = Object.entries(usersObj).map(([uid, data]: [string, any]) => ({
             uid,
-            ...data,
+            ...data
         }));
         setUsers(userList);
         setLoading(false);
@@ -135,13 +106,8 @@ const Users = () => {
 
     const handleToggleIsAccepted = async (uid: string, newValue: boolean) => {
         await updateUserStatus(uid, newValue);
-        setUsers((prev) =>
-            prev.map((u) => (u.uid === uid ? { ...u, isAccepted: newValue } : u))
-        );
+        setUsers((prev) => prev.map((u) => (u.uid === uid ? { ...u, isAccepted: newValue } : u)));
     };
-
-
-
 
     if (loading) return <div className="p-4">Loading users...</div>;
 
@@ -159,12 +125,17 @@ const Users = () => {
         router.push(`/pages/useredit`);
     };
 
+    const confirmDeleteLatePayments = async (userData: UserType) => {
+        const confirmDelete = window.confirm('Are you sure you want to delete this user?');
+        if (!confirmDelete) return;
 
-    const confirmDeleteLatePayments = (userData: UserType) => {
-        setDeleteDialog(true);
-
+        try {
+            await deleteUser(userData.uid);
+            console.log('User deleted successfully');
+        } catch (error) {
+            console.error('Error deleting user:', error);
+        }
     };
-
 
     const formatDate = (dateString: string) => {
         if (!dateString) return '';
@@ -177,21 +148,18 @@ const Users = () => {
         });
     };
 
-
     const displayUsers = users
-        .filter(user => {
+        .filter((user) => {
             // Your existing Status Filter
             if (statusFilter === 'Active') return user.isAccepted;
-            if (statusFilter === 'Pending') return !user.isAccepted;
+            if (statusFilter === 'Rejected') return user.isReject;
+            if (statusFilter === 'Pending') return !user.isAccepted && !user.isReject;
+            return true;
             return true;
         })
-        .filter(user => {
+        .filter((user) => {
             // Your existing Global Filter
-            return (
-                globalFilterValue === '' ||
-                user.displayName?.toLowerCase().includes(globalFilterValue.toLowerCase()) ||
-                user.email?.toLowerCase().includes(globalFilterValue.toLowerCase())
-            );
+            return globalFilterValue === '' || user.displayName?.toLowerCase().includes(globalFilterValue.toLowerCase()) || user.email?.toLowerCase().includes(globalFilterValue.toLowerCase());
         })
         .sort((a, b) => {
             // Sort by Date (Newest First)
@@ -207,8 +175,6 @@ const Users = () => {
         <div className="grid">
             <div className="col-12">
                 <div className="card">
-
-
                     {/* Page Title */}
                     <div className="mb-4">
                         <h4 style={{ color: '#e74c3c', margin: '0 0 1rem 0' }}>USER DETAILS</h4>
@@ -239,24 +205,17 @@ const Users = () => {
                         scrollable
                         scrollHeight="60vh"
                     >
-                        <Column field="createdAt" header="Date & Time" body={(rowData) => formatDate(rowData.createdAt)} style={{ minWidth: '14rem' }}
-                            className='border-b border-gray-500'
-                        />
-                        <Column field="displayName" header="Name" filterPlaceholder="Search by name" style={{ minWidth: '12rem' }} className='border-b border-gray-500' />
-                        <Column field="email" header="Email" filterPlaceholder="Search by email" style={{ minWidth: '15rem' }} className='border-b border-gray-500' />
-                        <Column field="phoneNumber" header="Phone Number" filterPlaceholder="Search by phoneNumber" style={{ minWidth: '15rem' }} className='border-b border-gray-500' />
-                        <Column field="bpUsername" header="BP Username" filterPlaceholder="Search by bpUsername" style={{ minWidth: '15rem' }} className='border-b border-gray-500' />
-                        <Column field="bpPassword" header="BP Password" filterPlaceholder="Search by bpPassword" style={{ minWidth: '15rem' }} className='border-b border-gray-500' />
-                        <Column field="isAccepted" header="Active" body={isAcceptedBodyTemplate} style={{ minWidth: '8rem' }} className='border-b border-gray-500' />
-                        <Column header="Action" body={actionBodyTemplate} headerStyle={{ minWidth: "13rem" }} className='border-b border-gray-500'></Column>
+                        <Column field="createdAt" header="Date & Time" body={(rowData) => formatDate(rowData.createdAt)} style={{ minWidth: '14rem' }} className="border-b border-gray-500" />
+                        <Column field="displayName" header="Name" filterPlaceholder="Search by name" style={{ minWidth: '12rem' }} className="border-b border-gray-500" />
+                        <Column field="email" header="Email" filterPlaceholder="Search by email" style={{ minWidth: '15rem' }} className="border-b border-gray-500" />
+                        <Column field="phoneNumber" header="Phone Number" filterPlaceholder="Search by phoneNumber" style={{ minWidth: '15rem' }} className="border-b border-gray-500" />
+                        <Column field="bpUsername" header="BP Username" filterPlaceholder="Search by bpUsername" style={{ minWidth: '15rem' }} className="border-b border-gray-500" />
+                        <Column field="bpPassword" header="BP Password" filterPlaceholder="Search by bpPassword" style={{ minWidth: '15rem' }} className="border-b border-gray-500" />
+                        <Column field="isAccepted" header="Status" body={isAcceptedBodyTemplate} style={{ minWidth: '8rem' }} className="border-b border-gray-500" />
+                        <Column header="Action" body={actionBodyTemplate} headerStyle={{ minWidth: '13rem' }} className="border-b border-gray-500"></Column>
                     </DataTable>
                 </div>
             </div>
-
-
-
-
-
         </div>
     );
 };

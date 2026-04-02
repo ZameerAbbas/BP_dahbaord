@@ -30,6 +30,7 @@ export interface UserType {
     displayName: string;
     userName: string;
     isAccepted: boolean;
+    isReject: boolean;
     createdAt: string;
     isAdmin: boolean;
     bpPassword: string;
@@ -135,6 +136,8 @@ export const updateUser = async (uid: string, updatedUser: Partial<UserType>) =>
     throw error;
   }
 };
+
+
 
 export const deleteUser = async (uid: string) => {
   try {

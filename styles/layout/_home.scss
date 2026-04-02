@@ -30,32 +30,32 @@
 /* GLOBAL: Remove scrollbar arrows but keep scrollbar */
 
 /* Chrome, Edge, Safari */
+/* Works for Chrome, Edge, Safari */
 ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-}
-
-::-webkit-scrollbar-button {
     display: none;
 }
 
-::-webkit-scrollbar-thumb {
-    background-color: #ccc;
-    border-radius: 6px;
-}
-
-::-webkit-scrollbar-track {
-    background: transparent;
-}
-
-/* Firefox */
+/* Works for Firefox */
 * {
-    scrollbar-width: thin;
-    scrollbar-color: #ccc transparent;
+    scrollbar-width: none;
+}
+
+/* Works for IE/Edge (old) */
+* {
+    -ms-overflow-style: none;
 }
 
 /* Hide PrimeReact DataTable vertical scroll buttons */
-.p-datatable-scrollable-wrapper .p-scrolltop,
-.p-datatable-scrollable-wrapper .p-scrollbottom {
-    display: none !important;
+.p-datatable-scrollable-body {
+    overflow: auto;
+}
+
+/* Hide scrollbar */
+.p-datatable-scrollable-body::-webkit-scrollbar {
+    display: none;
+}
+
+.p-datatable-scrollable-body {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
