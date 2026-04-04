@@ -29,7 +29,7 @@ const Users = () => {
 
     const renderHeader = () => {
         return (
-            <div className="flex flex-row justify-between items-center gap-3">
+            <div className="responsive-flex">
                 <div className="flex align-items-center gap-3 flex-wrap">
                     <div className="flex align-items-center gap-2">
                         <label className="font-semibold">Bulk Status:</label>
@@ -150,19 +150,18 @@ const Users = () => {
                                     {rowData.displayName}
                                 </span>
                             )}
-                            style={{ minWidth: '8rem' }}
-                            className="border-b border-white bg-yellow-300"
+                            style={{ minWidth: '8rem' ,backgroundColor:'#ffff00'}}
+                           
                         />
-                        <Column field="phoneNumber" header="Phone " filterPlaceholder="Search by phoneNumber" style={{ minWidth: '8rem' }} className="bg-yellow-300" />
-                        <Column field="bpUsername" header="BP Username" filterPlaceholder="Search by bpUsername" style={{ minWidth: '8rem' }} className="bg-yellow-300" />
-                        <Column field="bpPassword" header="BP Password" filterPlaceholder="Search by bpPassword" style={{ minWidth: '8rem' }} className="bg-yellow-300" />
+                        <Column field="phoneNumber" header="Phone " filterPlaceholder="Search by phoneNumber" style={{ minWidth: '8rem',backgroundColor:"#ffff00" }} />
+                        <Column field="bpUsername" header="BP Username" filterPlaceholder="Search by bpUsername" style={{ minWidth: '8rem' ,backgroundColor:"#ffff00" }}  />
+                        <Column field="bpPassword" header="BP Password" filterPlaceholder="Search by bpPassword" style={{ minWidth: '8rem' ,backgroundColor:"#ffff00"}}  />
                         <Column
                             field="isAccepted"
                             header="Status"
                             body={isAcceptedBodyTemplate}
-                            style={{ minWidth: '8rem' }}
-                            className="bg-yellow-300
-                        "
+                            style={{ minWidth: '8rem',backgroundColor:"#ffff00" }}
+                         
                         />
                     </DataTable>
                 </div>

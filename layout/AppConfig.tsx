@@ -36,10 +36,14 @@ const AppConfig = (props: AppConfigProps) => {
         setLayoutConfig((prevState: LayoutConfig) => ({ ...prevState, menuMode: e.value }));
     };
 
-    const _changeTheme = (theme: string, colorScheme: string) => {
+    const [themeMode, setThemeMode] = useState<'light' | 'dark'>(layoutConfig.colorScheme === 'dark' ? 'dark' : 'light');
+
+    const _changeTheme = (theme: string, colorScheme: any) => {
         changeTheme?.(layoutConfig.theme, theme, 'theme-css', () => {
             setLayoutConfig((prevState: LayoutConfig) => ({ ...prevState, theme, colorScheme }));
         });
+
+        setThemeMode(colorScheme);
     };
 
     const decrementScale = () => {
@@ -65,12 +69,7 @@ const AppConfig = (props: AppConfigProps) => {
 
             </button> */}
 
-            <button
-                type="button"
-                className="p-link layout-right-sidebar-button"
-                title="Settings"
-                onClick={onConfigButtonClick}
-            >
+            <button type="button" className="p-link layout-right-sidebar-button" title="Settings" onClick={onConfigButtonClick}>
                 <i className="pi pi-cog"></i>
             </button>
 
@@ -88,15 +87,28 @@ const AppConfig = (props: AppConfigProps) => {
                             <Button icon="pi pi-plus" type="button" onClick={incrementScale} rounded text className="w-2rem h-2rem ml-2" disabled={layoutConfig.scale === scales[scales.length - 1]}></Button>
                         </div>
 
-                        <h5>Menu Type</h5>
-                        <div className="flex">
+                        <h5>Theme Options</h5>
+
+                        <div className="flex gap-4 mb-4">
                             <div className="field-radiobutton flex-1">
-                                <RadioButton name="menuMode" value={'static'} checked={layoutConfig.menuMode === 'static'} onChange={(e) => changeMenuMode(e)} inputId="mode1"></RadioButton>
-                                <label htmlFor="mode1">Static</label>
+                                <RadioButton
+                                    name="themeMode"
+                                    value="light"
+                                    onClick={() => _changeTheme('bootstrap4-light-blue', 'light')} // default light theme
+                                    inputId="lightMode"
+                                    checked={themeMode === 'light'}
+                                />
+                                <label htmlFor="lightMode">Light</label>
                             </div>
                             <div className="field-radiobutton flex-1">
-                                <RadioButton name="menuMode" value={'overlay'} checked={layoutConfig.menuMode === 'overlay'} onChange={(e) => changeMenuMode(e)} inputId="mode2"></RadioButton>
-                                <label htmlFor="mode2">Overlay</label>
+                                <RadioButton
+                                    name="themeMode"
+                                    value="dark"
+                                    onClick={() => _changeTheme('bootstrap4-dark-blue', 'dark')} // default dark theme
+                                    inputId="darkMode"
+                                    checked={themeMode === 'dark'}
+                                />
+                                <label htmlFor="darkMode">Dark</label>
                             </div>
                         </div>
 
@@ -203,9 +215,6 @@ const AppConfig = (props: AppConfigProps) => {
                         </button>
                     </div>
                 </div>
-
-
-
             </Sidebar>
         </>
     );

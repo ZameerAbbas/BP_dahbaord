@@ -6,3 +6,31 @@
     padding-top: 1rem;
     border-top: 1px solid var(--surface-border);
 }
+
+
+.mobile-footer-sidebar {
+  display: none;
+
+  @media screen and (max-width: 768px) {
+    display: flex;           // show only on mobile
+    flex-direction: row;     // horizontal
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+  }
+
+  button {
+    position: relative;
+
+    .notification-dot {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: red;
+      animation: ping 1s infinite;
+    }
+  }
+}

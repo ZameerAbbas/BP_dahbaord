@@ -17,7 +17,7 @@ const AppMenu = () => {
     const { currentUser, layoutConfig } = useContext(LayoutContext);
 
     const userInitial = currentUser?.displayName ? currentUser.displayName : currentUser?.email ? currentUser.email : 'Admin';
-    console.log("layoutConfig.colorScheme",layoutConfig.colorScheme)
+    console.log('layoutConfig.colorScheme', layoutConfig.colorScheme);
 
     const model: AppMenuItem[] = [
         {
@@ -59,11 +59,11 @@ const AppMenu = () => {
             <div className="flex items-center p-3 border-b">
                 <div className="p-3 border-b">
                     <div>
-                        <span className={`text-sm font-medium ${layoutConfig.colorScheme === 'light' ? 'text-white' : 'text-gray-800'}`}>{userInitial || 'Guest'}</span>
+                        <span className={`text-sm font-medium ${layoutConfig.colorScheme === 'light' ? 'text-gray-800' : ' text-white'}`}>{userInitial || 'Guest'}</span>
                     </div>
 
                     <div className="text-right">
-                        <span className={`text-xs ${layoutConfig.colorScheme === 'light' ? 'text-white' : 'text-gray-500'}`}>Manager</span>
+                        <span className={`text-xs ${layoutConfig.colorScheme === 'light' ? 'text-gray-500' : 'text-white'}`}>Manager</span>
                     </div>
                 </div>
             </div>

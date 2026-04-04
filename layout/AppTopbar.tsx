@@ -101,14 +101,14 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
     return (
         <div className="layout-topbar">
             <Link href="/" className="layout-topbar-logo flex items-center gap-2">
-                <img
+                {/* <img
                     src="/layout/images/logo.jpeg"
                     width={47}
                     height={35}
                     className="rounded-full"
                     alt="logo"
-                />
-                <span className="font-semibold text-lg">Mathmatics</span>
+                /> */}
+                <span className="font-semibold text-lg">MM</span>
             </Link>
 
             <button
