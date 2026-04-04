@@ -43,10 +43,10 @@ const Users = () => {
         const filteredUsers = statusFilter === 'All' ? users : statusFilter === 'Active' ? users.filter((u) => u.isAccepted) : users.filter((u) => !u.isAccepted);
 
         return (
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-6 w-full">
+            <div className="responsive-flex">
                 {/* Bulk Status */}
                 <div className="flex flex-col sm:flex-roe items-start sm:items-center gap-3 flex-wrap w-full sm:w-auto">
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                    <div className="responsive-flex">
                         <label className="font-semibold">Bulk Status:</label>
                         <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="p-2 border border-gray-300 rounded-md w-full sm:w-auto" style={{ minWidth: '150px' }}>
                             <option value="All">All</option>
@@ -58,7 +58,7 @@ const Users = () => {
                 </div>
 
                 {/* Name Search */}
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3 w-full sm:w-auto">
+                <div className="responsive-flex">
                     <label className="font-semibold">Name Search:</label>
                     <span className="p-input-icon-left w-full sm:w-auto flex-1">
                         <i className="pi pi-search" />

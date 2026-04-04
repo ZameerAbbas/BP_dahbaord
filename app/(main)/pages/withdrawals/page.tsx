@@ -51,7 +51,7 @@ const Withdrawals = () => {
 
     const renderHeader = () => {
         return (
-            <div className="flex justify-content-between align-items-center gap-2 mb-3">
+            <div className="responsive-flex">
                 <div className="flex gap-2 align-items-center">
                     <label className="font-semibold">Status:</label>
                     <Dropdown
@@ -68,7 +68,7 @@ const Withdrawals = () => {
                     />
                 </div>
                 <div className="flex gap-2 align-items-center">
-                    <Button type="button" icon="pi pi-filter-slash" label="Clear" outlined onClick={clearFilter} />
+                    <Button type="button" icon="pi pi-filter-slash" label="Clear" outlined onClick={clearFilter}   className="hidden sm:flex"/>
                     <span className="p-input-icon-left">
                         <i className="pi pi-search" />
                         <InputText value={globalFilterValue} onChange={onGlobalFilterChange} placeholder="Search..." />

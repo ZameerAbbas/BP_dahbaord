@@ -59,3 +59,26 @@
     scrollbar-width: none;
     -ms-overflow-style: none;
 }
+
+
+.responsive-flex {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  width: 100%;
+
+  @media (min-width: 640px) {
+    // still column on sm
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
+
+  @media (min-width: 768px) {
+    // switch to row only on md+
+    flex-direction: row;
+    align-items: center;
+  }
+}

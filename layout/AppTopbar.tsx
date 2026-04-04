@@ -28,7 +28,7 @@
 //         <div className="layout-topbar">
 //             <Link href="/" className="layout-topbar-logo">
 //                 <img src={`/layout/images/logo-${layoutConfig.colorScheme !== 'light' ? 'white' : 'dark'}.svg`} width="47.22px" height={'35px'} alt="logo" />
-//                 <span>Admin Panel</span>
+//                 <span>Mathmatics</span>
 //             </Link>
 
 //             <button ref={menubuttonRef} type="button" className="p-link layout-menu-button layout-topbar-button" onClick={onMenuToggle}>
@@ -108,7 +108,7 @@ const AppTopbar = forwardRef<AppTopbarRef>((props, ref) => {
                     className="rounded-full"
                     alt="logo"
                 />
-                <span className="font-semibold text-lg">Admin Panel</span>
+                <span className="font-semibold text-lg">Mathmatics</span>
             </Link>
 
             <button
