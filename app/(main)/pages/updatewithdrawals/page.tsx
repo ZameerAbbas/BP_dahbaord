@@ -10,8 +10,6 @@ import { db } from '@/firebase'; // your firebase config
 import { useRouter } from 'next/navigation';
 import { getOrderById, OrderType, updateOrder } from '@/firebaseUtils';
 
-
-
 const statusOptions = [
     { label: 'Approved', value: 'approved' },
     { label: 'Rejected', value: 'rejected' }
@@ -25,9 +23,7 @@ const UpdateOrder = () => {
 
     const [preview, setPreview] = useState<string>('');
 
-    const orderInfo = localStorage.getItem('orderInfo')
-        ? JSON.parse(localStorage.getItem('orderInfo') as string)
-        : null;
+    const orderInfo = localStorage.getItem('orderInfo') ? JSON.parse(localStorage.getItem('orderInfo') as string) : null;
 
     const uid = orderInfo?.uid;
     const orderId = orderInfo?.orderId;
@@ -52,12 +48,10 @@ const UpdateOrder = () => {
     }, [orderId]);
     console.log('Form State:', form);
 
-
     const handleChange = (field: keyof OrderType, value: any) => {
         if (!form) return;
         setForm({ ...form, [field]: value });
     };
-
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -67,7 +61,7 @@ const UpdateOrder = () => {
         reader.onload = () => {
             const base64 = reader.result as string;
 
-            setForm(prev => prev ? { ...prev, screenshotAdmin: base64 } : prev);
+            setForm((prev) => (prev ? { ...prev, screenshotAdmin: base64 } : prev));
             setPreview(base64);
         };
         reader.readAsDataURL(file);
@@ -97,39 +91,22 @@ const UpdateOrder = () => {
             <h2 className="text-center text-xl font-bold mb-4">Update Order</h2>
 
             <div className="grid">
-
                 {/* Status */}
                 <div className="col-12">
                     <label>Status</label>
-                    <Dropdown
-                        value={form.status}
-                        options={statusOptions}
-                        onChange={(e) => handleChange('status', e.value)}
-                        placeholder="Select Status"
-                        className="w-full"
-                    />
+                    <Dropdown value={form.status} options={statusOptions} onChange={(e) => handleChange('status', e.value)} placeholder="Select Status" className="w-full" />
                 </div>
 
                 {/* Notes */}
                 <div className="col-12">
                     <label>Notes</label>
-                    <InputTextarea
-                        value={form.notes}
-                        onChange={(e) => handleChange('notes', e.target.value)}
-                        rows={3}
-                        className="w-full"
-                    />
+                    <InputTextarea value={form.notes} onChange={(e) => handleChange('notes', e.target.value)} rows={3} className="w-full" />
                 </div>
 
                 {/* Upload Screenshot */}
                 <div className="col-12">
                     <label>Upload Screenshot</label>
-                    <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageChange}
-                        className="w-full"
-                    />
+                    <input type="file" accept="image/*" onChange={handleImageChange} className="w-full" />
                 </div>
 
                 {/* Preview */}
@@ -139,18 +116,23 @@ const UpdateOrder = () => {
                         <img
                             src={preview}
                             alt="preview"
-                            className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 mt-2 border rounded object-cover"
+                            style={{
+                           
+                                width: '200px',
+                                height: '200px',
+                                borderRadius: '12px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                transition: 'all 0.3s ease'
+                            }}
                         />
                     </div>
                 )}
             </div>
 
             <div className="flex justify-center mt-4">
-                <Button
-                    label="Update Order"
-                    loading={loading}
-                    onClick={handleSubmit}
-                />
+                <Button label="Update Order" loading={loading} onClick={handleSubmit} />
             </div>
         </div>
     );

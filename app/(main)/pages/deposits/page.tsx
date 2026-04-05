@@ -5,10 +5,12 @@ import { Column, ColumnFilterApplyTemplateOptions, ColumnFilterClearTemplateOpti
 import { DataTable, DataTableFilterMeta } from 'primereact/datatable';
 import { InputText } from 'primereact/inputtext';
 import { classNames } from 'primereact/utils';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState ,useContext} from 'react';
 import { listenDepositOrders, OrderType, updateOrderStatus } from '@/firebaseUtils';
 import { Dropdown } from 'primereact/dropdown';
 import { Dialog } from 'primereact/dialog';
+import { LayoutContext } from '@/layout/context/layoutcontext';
+
 
 interface UserType {
     uid: string;
@@ -17,14 +19,13 @@ interface UserType {
     isAccepted: boolean;
     createdAt: string;
     isAdmin: boolean;
-    phoneNumber: string
-    bpUsername: string
+    phoneNumber: string;
+    bpUsername: string;
 }
-
-
 
 const Deposits = () => {
     const [deposits, setDeposits] = useState<OrderType[]>([]);
+    const { layoutConfig } = useContext(LayoutContext);
     const [users, setUsers] = useState<Map<string, UserType>>(new Map());
     const [loading, setLoading] = useState(true);
     const [filters, setFilters] = useState<DataTableFilterMeta>({});
@@ -48,7 +49,7 @@ const Deposits = () => {
 
     const renderHeader = () => {
         return (
-            <div className="responsive-flex">
+            <div className="responsive-flex" style={{ marginBottom: '1.5rem' }}>
                 <div className="flex gap-2 align-items-center">
                     <label className="font-semibold">Status:</label>
                     <Dropdown
@@ -65,7 +66,7 @@ const Deposits = () => {
                     />
                 </div>
                 <div className="flex gap-2 align-items-center">
-                    <Button type="button" icon="pi pi-filter-slash" label="Clear"  className="hidden sm:flex" outlined onClick={clearFilter} />
+                    <Button type="button" icon="pi pi-filter-slash" label="Clear" className="hidden sm:flex" outlined onClick={clearFilter} />
                     <span className="p-input-icon-left">
                         <i className="pi pi-search" />
                         <InputText value={globalFilterValue} onChange={onGlobalFilterChange} placeholder="Search..." />
@@ -118,11 +119,10 @@ const Deposits = () => {
 
     const imageBodyTemplate = (rowData: OrderType) => {
         return (
-
-
-            <a onClick={() => handleDownload(rowData.screenshot)}
-                className='  cursor-pointer'
-            > View Image</a>
+            <a onClick={() => handleDownload(rowData.screenshot)} className="  cursor-pointer">
+                {' '}
+                View Image
+            </a>
         );
     };
 
@@ -149,20 +149,8 @@ const Deposits = () => {
         const isApprovalPending = rowData.status === 'pending';
         return (
             <div className="flex gap-2">
-                <Button
-                    label="Approve"
-                    icon="pi pi-check"
-                    className="p-button-rounded p-button-success p-button-sm"
-                    onClick={() => handleApprove(rowData)}
-                    disabled={!isApprovalPending}
-                />
-                <Button
-                    label="Reject"
-                    icon="pi pi-times"
-                    className="p-button-rounded p-button-danger p-button-sm"
-                    onClick={() => handleReject(rowData)}
-                    disabled={!isApprovalPending}
-                />
+                <Button label="Approve" icon="pi pi-check" className="p-button-rounded p-button-success p-button-sm" onClick={() => handleApprove(rowData)} disabled={!isApprovalPending} />
+                <Button label="Reject" icon="pi pi-times" className="p-button-rounded p-button-danger p-button-sm" onClick={() => handleReject(rowData)} disabled={!isApprovalPending} />
             </div>
         );
     };
@@ -171,14 +159,10 @@ const Deposits = () => {
         const statusClasses: Record<string, string> = {
             pending: 'bg-yellow-100 text-yellow-800',
             approved: 'bg-green-100 text-green-800',
-            rejected: 'bg-red-100 text-red-800',
+            rejected: 'bg-red-100 text-red-800'
         };
 
-        return (
-            <span className={`px-3 py-1 rounded-full text-sm font-semibold ${statusClasses[rowData.status] || 'bg-gray-100'}`}>
-                {rowData.status?.charAt(0).toUpperCase() + rowData.status?.slice(1) || 'Unknown'}
-            </span>
-        );
+        return <span className={`px-3 py-1 rounded-full text-sm font-semibold ${statusClasses[rowData.status] || 'bg-gray-100'}`}>{rowData.status?.charAt(0).toUpperCase() + rowData.status?.slice(1) || 'Unknown'}</span>;
     };
 
     const amountBodyTemplate = (rowData: OrderType) => {
@@ -198,14 +182,12 @@ const Deposits = () => {
     }, []);
 
     useEffect(() => {
-
         initFilters();
     }, []);
 
     const handleApprove = async (order: OrderType) => {
         try {
             await updateOrderStatus(order.uid, order.id, 'approved');
-
         } catch (error) {
             console.error('Error approving order:', error);
         }
@@ -223,12 +205,9 @@ const Deposits = () => {
 
     if (loading) return <div className="p-4 text-center">Loading deposits...</div>;
 
-    const filteredDeposits = (selectedStatus
-        ? deposits.filter(d => d.status === selectedStatus)
-        : deposits
-    ).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    const filteredDeposits = (selectedStatus ? deposits.filter((d) => d.status === selectedStatus) : deposits).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
-    console.log("filteredDeposits", filteredDeposits);
+    console.log('filteredDeposits', filteredDeposits);
     return (
         <div className="grid">
             <div className="col-12">
@@ -238,7 +217,7 @@ const Deposits = () => {
                     <DataTable
                         value={filteredDeposits}
                         // paginator
-                        className="p-datatable-gridlines"
+                        className={`p-datatable-gridlines ${layoutConfig.colorScheme === 'dark' ? 'custom-dark-table' : 'custom-light-table'}`}
                         showGridlines
                         // rows={10}
                         dataKey="id"
@@ -250,30 +229,52 @@ const Deposits = () => {
                         scrollable
                         scrollHeight="60vh"
                     >
-                        <Column field="createdAt" header="Date & Time" body={(rowData) => formatDate(rowData.createdAt)} style={{ minWidth: '14rem' }} className='border-b-2 border-gray-500' />
-                        <Column field="userName" header="Customer Name" filterPlaceholder="Search by name" style={{ minWidth: '12rem' }} className='border-b-2 border-gray-500' />
-                        <Column field="accountNumber" header="Phone" style={{ minWidth: '12rem' }} className='border-b-2 border-gray-500' />
-                        <Column field="amount" header="Amount" body={amountBodyTemplate} style={{ minWidth: '10rem' }} className='border-b-2 border-gray-500' />
-                        <Column field="bpId" header="BP Username" style={{ minWidth: '12rem' }} className='border-b-2 border-gray-500' />
-                        <Column field="screenshot" header="Attachment" body={imageBodyTemplate} style={{ minWidth: '10rem' }} className='border-b-2 border-gray-500' />
-                        <Column field="status" header="Status" body={statusBodyTemplate} style={{ minWidth: '10rem' }} className='border-b-2 border-gray-500' />
-                        <Column header="Action" body={actionBodyTemplate} style={{ minWidth: '16rem' }} className='border-b-2 border-gray-500' />
+                        <Column field="createdAt" header="Date & Time" body={(rowData) => formatDate(rowData.createdAt)} 
+                          style={{
+                                backgroundColor: layoutConfig.colorScheme === 'dark' ? '#2A323D' : '#ffffff',
+                                color: layoutConfig.colorScheme === 'dark' ? '#ffffff' : '#000000',
+                                minWidth: '12rem'
+                            }}
+                        className="border-b-2 border-gray-500" />
+                        <Column field="userName" header="Customer Name" filterPlaceholder="Search by name"style={{
+                                backgroundColor: layoutConfig.colorScheme === 'dark' ? '#2A323D' : '#ffffff',
+                                color: layoutConfig.colorScheme === 'dark' ? '#ffffff' : '#000000',
+                                minWidth: '12rem'
+                            }} className="border-b-2 border-gray-500" />
+                        <Column field="accountNumber" header="Phone" style={{
+                                backgroundColor: layoutConfig.colorScheme === 'dark' ? '#2A323D' : '#ffffff',
+                                color: layoutConfig.colorScheme === 'dark' ? '#ffffff' : '#000000',
+                                minWidth: '12rem'
+                            }} className="border-b-2 border-gray-500" />
+                        <Column field="amount" header="Amount" body={amountBodyTemplate} style={{
+                                backgroundColor: layoutConfig.colorScheme === 'dark' ? '#2A323D' : '#ffffff',
+                                color: layoutConfig.colorScheme === 'dark' ? '#ffffff' : '#000000',
+                                minWidth: '10rem'
+                            }} className="border-b-2 border-gray-500" />
+                        <Column field="bpId" header="BP Username" style={{
+                                backgroundColor: layoutConfig.colorScheme === 'dark' ? '#2A323D' : '#ffffff',
+                                color: layoutConfig.colorScheme === 'dark' ? '#ffffff' : '#000000',
+                                minWidth: '12rem'
+                            }} className="border-b-2 border-gray-500" />
+                        <Column field="screenshot" header="Attachment" body={imageBodyTemplate} style={{
+                                backgroundColor: layoutConfig.colorScheme === 'dark' ? '#2A323D' : '#ffffff',
+                                color: layoutConfig.colorScheme === 'dark' ? '#ffffff' : '#000000',
+                                minWidth: '10rem'
+                            }} className="border-b-2 border-gray-500" />
+                        <Column field="status" header="Status" body={statusBodyTemplate} style={{
+                                backgroundColor: layoutConfig.colorScheme === 'dark' ? '#2A323D' : '#ffffff',
+                                color: layoutConfig.colorScheme === 'dark' ? '#ffffff' : '#000000',
+                                minWidth: '10rem'
+                            }} className="border-b-2 border-gray-500" />
+                        <Column header="Action" body={actionBodyTemplate} style={{
+                                backgroundColor: layoutConfig.colorScheme === 'dark' ? '#2A323D' : '#ffffff',
+                                color: layoutConfig.colorScheme === 'dark' ? '#ffffff' : '#000000',
+                                minWidth: '16rem'
+                            }} className="border-b-2 border-gray-500" />
                     </DataTable>
 
-                    <Dialog
-                        header="Deposit Screenshot"
-                        visible={isDialogVisible}
-                        style={{ width: '50vw' }}
-                        modal
-                        onHide={() => setIsDialogVisible(false)}
-                    >
-                        {selectedImage && (
-                            <img
-                                src={selectedImage}
-                                alt="Deposit Screenshot"
-                                className="w-full h-auto object-contain rounded-md"
-                            />
-                        )}
+                    <Dialog header="Deposit Screenshot" visible={isDialogVisible} style={{ width: '50vw' }} modal onHide={() => setIsDialogVisible(false)}>
+                        {selectedImage && <img src={selectedImage} alt="Deposit Screenshot" className="w-full h-auto object-contain rounded-md" />}
                     </Dialog>
                 </div>
             </div>

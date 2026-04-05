@@ -1,17 +1,14 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
 import { Button } from 'primereact/button';
 import { Tag } from 'primereact/tag';
 
-import {
-    listenBanks,
-    updateBankStatus,
-    deleteBank
-} from '@/firebaseUtils';
+import { listenBanks, updateBankStatus, deleteBank } from '@/firebaseUtils';
 import { useRouter } from 'next/navigation';
+import { LayoutContext } from '@/layout/context/layoutcontext';
 
 export interface bankInfoType {
     uid: string;
@@ -23,6 +20,7 @@ export interface bankInfoType {
 }
 
 const Banks = () => {
+    const { layoutConfig } = useContext(LayoutContext);
     const [banks, setBanks] = useState<bankInfoType[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -66,32 +64,15 @@ const Banks = () => {
             }
         };
 
-        return (
-            <Tag
-                value={row.status ? 'Active' : 'Inactive'}
-                severity={row.status ? 'success' : 'danger'}
-                className="cursor-pointer"
-                onClick={handleToggleStatus}
-            />
-        );
+        return <Tag value={row.status ? 'Active' : 'Inactive'} severity={row.status ? 'success' : 'danger'} className="cursor-pointer" onClick={handleToggleStatus} />;
     };
 
     const actionTemplate = (row: bankInfoType) => {
         return (
             <div className="flex gap-2">
-                <Button
+                <Button icon="pi pi-pencil" className="p-button-sm bg-[#0F1D41] text-white hover:bg-[#0F1D49]" onClick={() => handleEdit(row)} />
 
-                    icon="pi pi-pencil"
-                    className="p-button-sm bg-[#0F1D41] text-white hover:bg-[#0F1D49]"
-                    onClick={() => handleEdit(row)}
-                />
-
-                <Button
-
-                    icon="pi pi-trash"
-                    className="p-button-sm p-button-danger"
-                    onClick={() => handleDelete(row)}
-                />
+                <Button icon="pi pi-trash" className="p-button-sm p-button-danger" onClick={() => handleDelete(row)} />
             </div>
         );
     };
@@ -99,7 +80,7 @@ const Banks = () => {
     const handleEdit = (bank: bankInfoType) => {
         localStorage.setItem('bankId', JSON.stringify(bank.uid));
         router.push(`/pages/cerateupdatebank`);
-    }
+    };
 
     return (
         <div className="card">
@@ -121,30 +102,67 @@ const Banks = () => {
                             //     alert('Maximum of 3 banks allowed. Please delete an existing bank to add a new one.');
                             // } else
                             router.push(`/pages/cerateupdatebank`);
-                        }
-                        }
-                        title={banks.length >= 3 ? "Maximum of 3 banks allowed" : "Add a new bank"}
+                        }}
+                        title={banks.length >= 3 ? 'Maximum of 3 banks allowed' : 'Add a new bank'}
                     />
                 </div>
             </div>
 
             {/* TABLE */}
-            <DataTable value={banks} loading={loading} showGridlines
-                scrollable
-                scrollHeight="60vh"
-            >
-                <Column field="bankName" header="Bank Name" className='border-b-2 border-gray-500' />
-                <Column field="accountTitle" header="Account Title" className='border-b-2 border-gray-500' />
-                <Column field="accountNumber" header="Account Number" className='border-b-2 border-gray-500' />
-                <Column field="category" header="Category"
-                    body={(row: bankInfoType) => (
-                        <p className="bg-green-500 rounded-full text-white px-2 py-1 inline-block">
-                            {row.category}
-                        </p>
-                    )}
-                    className='border-b-2 border-gray-500 ' />
-                <Column header="Status" body={statusTemplate} className='border-b-2 border-gray-500' />
-                <Column header="Actions" body={actionTemplate} className='border-b-2 border-gray-500' />
+            <DataTable value={banks} loading={loading} showGridlines scrollable scrollHeight="60vh" className={`p-datatable-gridlines ${layoutConfig.colorScheme === 'dark' ? 'custom-dark-table' : 'custom-light-table'}`}>
+                <Column
+                    field="bankName"
+                    header="Bank Name"
+                    className="border-b-2 border-gray-500"
+                    style={{
+                        backgroundColor: layoutConfig.colorScheme === 'dark' ? '#2A323D' : '#ffffff',
+                        color: layoutConfig.colorScheme === 'dark' ? '#ffffff' : '#000000'
+                    }}
+                />
+                <Column
+                    field="accountTitle"
+                    header="Account Title"
+                    className="border-b-2 border-gray-500"
+                    style={{
+                        backgroundColor: layoutConfig.colorScheme === 'dark' ? '#2A323D' : '#ffffff',
+                        color: layoutConfig.colorScheme === 'dark' ? '#ffffff' : '#000000'
+                    }}
+                />
+                <Column
+                    field="accountNumber"
+                    header="Account Number"
+                    className="border-b-2 border-gray-500"
+                    style={{
+                        backgroundColor: layoutConfig.colorScheme === 'dark' ? '#2A323D' : '#ffffff',
+                        color: layoutConfig.colorScheme === 'dark' ? '#ffffff' : '#000000'
+                    }}
+                />
+                <Column
+                    field="category"
+                    header="Category"
+                    style={{
+                        backgroundColor: layoutConfig.colorScheme === 'dark' ? '#2A323D' : '#ffffff',
+                        color: layoutConfig.colorScheme === 'dark' ? '#ffffff' : '#000000'
+                    }}
+                    body={(row: bankInfoType) => <p className="bg-green-500 rounded-full text-white px-2 py-1 inline-block">{row.category}</p>}
+                    className="border-b-2 border-gray-500 "
+                />
+                <Column header="Status" body={statusTemplate} className="border-b-2 border-gray-500" 
+                   style={{
+                                backgroundColor: layoutConfig.colorScheme === 'dark' ? '#2A323D' : '#ffffff',
+                                color: layoutConfig.colorScheme === 'dark' ? '#ffffff' : '#000000',
+                            
+                            }}
+                />
+                <Column
+                    header="Actions"
+                    body={actionTemplate}
+                    className="border-b-2 border-gray-500"
+                    style={{
+                        backgroundColor: layoutConfig.colorScheme === 'dark' ? '#2A323D' : '#ffffff',
+                        color: layoutConfig.colorScheme === 'dark' ? '#ffffff' : '#000000'
+                    }}
+                />
             </DataTable>
         </div>
     );

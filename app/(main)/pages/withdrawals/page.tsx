@@ -5,11 +5,12 @@ import { Column, ColumnFilterApplyTemplateOptions, ColumnFilterClearTemplateOpti
 import { DataTable, DataTableFilterMeta } from 'primereact/datatable';
 import { InputText } from 'primereact/inputtext';
 import { classNames } from 'primereact/utils';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { listenWithdrawalOrders, OrderType, updateOrderStatus } from '@/firebaseUtils';
 import { Dropdown } from 'primereact/dropdown';
 import { Dialog } from 'primereact/dialog';
 import { useRouter } from 'next/navigation';
+import { LayoutContext } from '@/layout/context/layoutcontext';
 
 interface UserType {
     uid: string;
@@ -22,9 +23,9 @@ interface UserType {
     phoneNumber: string;
 }
 
-
-
 const Withdrawals = () => {
+
+        const { layoutConfig } = useContext(LayoutContext);
     const [withdrawals, setWithdrawals] = useState<OrderType[]>([]);
     const [users, setUsers] = useState<Map<string, UserType>>(new Map());
     const [loading, setLoading] = useState(true);
@@ -51,7 +52,7 @@ const Withdrawals = () => {
 
     const renderHeader = () => {
         return (
-            <div className="responsive-flex">
+            <div className="responsive-flex" style={{ marginBottom: '1.5rem' }}>
                 <div className="flex gap-2 align-items-center">
                     <label className="font-semibold">Status:</label>
                     <Dropdown
@@ -68,7 +69,7 @@ const Withdrawals = () => {
                     />
                 </div>
                 <div className="flex gap-2 align-items-center">
-                    <Button type="button" icon="pi pi-filter-slash" label="Clear" outlined onClick={clearFilter}   className="hidden sm:flex"/>
+                    <Button type="button" icon="pi pi-filter-slash" label="Clear" outlined onClick={clearFilter} className="hidden sm:flex" />
                     <span className="p-input-icon-left">
                         <i className="pi pi-search" />
                         <InputText value={globalFilterValue} onChange={onGlobalFilterChange} placeholder="Search..." />
@@ -121,11 +122,10 @@ const Withdrawals = () => {
 
     const imageBodyTemplate = (rowData: OrderType) => {
         return (
-
-
-            <a onClick={() => handleDownload(rowData.screenshot)}
-                className='  cursor-pointer'
-            > View Image</a>
+            <a onClick={() => handleDownload(rowData.screenshot)} className="  cursor-pointer">
+                {' '}
+                View Image
+            </a>
         );
     };
 
@@ -152,20 +152,8 @@ const Withdrawals = () => {
         const isApprovalPending = rowData.status === 'pending';
         return (
             <div className="flex gap-2">
-                <Button
-                    label="Approve"
-                    icon="pi pi-check"
-                    className="p-button-rounded p-button-success p-button-sm"
-                    onClick={() => handleApprove(rowData)}
-                    disabled={!isApprovalPending}
-                />
-                <Button
-                    label="Reject"
-                    icon="pi pi-times"
-                    className="p-button-rounded p-button-danger p-button-sm"
-                    onClick={() => handleReject(rowData)}
-                    disabled={!isApprovalPending}
-                />
+                <Button label="Approve" icon="pi pi-check" className="p-button-rounded p-button-success p-button-sm" onClick={() => handleApprove(rowData)} disabled={!isApprovalPending} />
+                <Button label="Reject" icon="pi pi-times" className="p-button-rounded p-button-danger p-button-sm" onClick={() => handleReject(rowData)} disabled={!isApprovalPending} />
             </div>
         );
     };
@@ -175,20 +163,15 @@ const Withdrawals = () => {
             pending: 'bg-yellow-100 text-yellow-800',
             approved: 'bg-green-100 text-green-800',
             rejected: 'bg-red-100 text-red-800',
-            completed: 'bg-blue-100 text-blue-800',
+            completed: 'bg-blue-100 text-blue-800'
         };
 
-        return (
-            <span className={`px-3 py-1 rounded-full text-sm font-semibold ${statusClasses[rowData.status] || 'bg-gray-100'}`}>
-                {rowData.status?.charAt(0).toUpperCase() + rowData.status?.slice(1) || 'Unknown'}
-            </span>
-        );
+        return <span className={`px-3 py-1 rounded-full text-sm font-semibold ${statusClasses[rowData.status] || 'bg-gray-100'}`}>{rowData.status?.charAt(0).toUpperCase() + rowData.status?.slice(1) || 'Unknown'}</span>;
     };
 
     const amountBodyTemplate = (rowData: OrderType) => {
         return formatCurrency(rowData.amount);
     };
-
 
     useEffect(() => {
         setLoading(true);
@@ -200,7 +183,6 @@ const Withdrawals = () => {
             unsubscribeWithdrawals();
         };
     }, []);
-
 
     const handleApprove = async (order: OrderType) => {
         try {
@@ -221,7 +203,6 @@ const Withdrawals = () => {
     const handleReject = async (order: OrderType) => {
         try {
             await updateOrderStatus(order.uid, order.id, 'rejected');
-
         } catch (error) {
             console.error('Error rejecting order:', error);
         }
@@ -231,12 +212,7 @@ const Withdrawals = () => {
 
     if (loading) return <div className="p-4 text-center">Loading withdrawals...</div>;
 
-
-
-    const filteredWithdrawals = (selectedStatus
-        ? withdrawals.filter(d => d.status === selectedStatus)
-        : withdrawals
-    ).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    const filteredWithdrawals = (selectedStatus ? withdrawals.filter((d) => d.status === selectedStatus) : withdrawals).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
     return (
         <div className="grid">
@@ -247,7 +223,8 @@ const Withdrawals = () => {
                     <DataTable
                         value={filteredWithdrawals}
                         // paginator
-                        className="p-datatable-gridlines"
+                                            className={`p-datatable-gridlines ${layoutConfig.colorScheme === 'dark' ? 'custom-dark-table' : 'custom-light-table'}`}
+
                         showGridlines
                         // rows={10}
                         dataKey="id"
@@ -258,34 +235,60 @@ const Withdrawals = () => {
                         emptyMessage="No withdrawals found."
                         scrollable
                         scrollHeight="60vh"
-                    // pag
+                        // pag
                     >
-                        <Column field="createdAt" header="Date & Time" body={(rowData) => formatDate(rowData.createdAt)} style={{ minWidth: '14rem' }}
-                        className='border-b-2 border-gray-500'
+                        <Column field="createdAt" header="Date & Time" body={(rowData) => formatDate(rowData.createdAt)}  style={{
+                                backgroundColor: layoutConfig.colorScheme === 'dark' ? '#2A323D' : '#ffffff',
+                                color: layoutConfig.colorScheme === 'dark' ? '#ffffff' : '#000000',
+                            minWidth: '14rem'
+                            }} className="border-b-2 border-gray-500" />
+                        <Column field="userName" header="Customer Name" filterPlaceholder="Search by name"  style={{
+                                backgroundColor: layoutConfig.colorScheme === 'dark' ? '#2A323D' : '#ffffff',
+                                color: layoutConfig.colorScheme === 'dark' ? '#ffffff' : '#000000',
+                            minWidth: '12rem'
+                            }} className="border-b-2 border-gray-500" />
+                        <Column field="accountNumber" header="Phone"  style={{
+                                backgroundColor: layoutConfig.colorScheme === 'dark' ? '#2A323D' : '#ffffff',
+                                color: layoutConfig.colorScheme === 'dark' ? '#ffffff' : '#000000',
+                            minWidth: '12rem'
+                            }} className="border-b-2 border-gray-500" />
+                        <Column field="amount" header="Amount" body={amountBodyTemplate}  style={{
+                                backgroundColor: layoutConfig.colorScheme === 'dark' ? '#2A323D' : '#ffffff',
+                                color: layoutConfig.colorScheme === 'dark' ? '#ffffff' : '#000000',
+                            minWidth: '10rem'
+                            }} className="border-b-2 border-gray-500" />
+                        <Column field="bpId" header="BP Username"  style={{
+                                backgroundColor: layoutConfig.colorScheme === 'dark' ? '#2A323D' : '#ffffff',
+                                color: layoutConfig.colorScheme === 'dark' ? '#ffffff' : '#000000',
+                            minWidth: '12rem'
+                            }}className="border-b-2 border-gray-500" />
+                        <Column field="screenshot" header="Attachment" body={imageBodyTemplate} 
+                         style={{
+                                backgroundColor: layoutConfig.colorScheme === 'dark' ? '#2A323D' : '#ffffff',
+                                color: layoutConfig.colorScheme === 'dark' ? '#ffffff' : '#000000',
+                            minWidth: '10rem'
+                            }}
+                        className="border-b-2 border-gray-500" />
+                        <Column field="status" header="Status" body={statusBodyTemplate} 
+                         style={{
+                                backgroundColor: layoutConfig.colorScheme === 'dark' ? '#2A323D' : '#ffffff',
+                                color: layoutConfig.colorScheme === 'dark' ? '#ffffff' : '#000000',
+                            minWidth: '10rem'
+                            }}
+                        
+                        className="border-b-2 border-gray-500" />
+                        <Column header="Action" body={actionBodyTemplate}  className="border-b-2 border-gray-500" 
+                           style={{
+                                backgroundColor: layoutConfig.colorScheme === 'dark' ? '#2A323D' : '#ffffff',
+                                color: layoutConfig.colorScheme === 'dark' ? '#ffffff' : '#000000',
+                            minWidth: '16rem'
+                            }}
+                        
                         />
-                        <Column field="userName" header="Customer Name" filterPlaceholder="Search by name" style={{ minWidth: '12rem' }} className='border-b-2 border-gray-500'/>
-                        <Column field="accountNumber" header="Phone" style={{ minWidth: '12rem' }} className='border-b-2 border-gray-500'/>
-                        <Column field="amount" header="Amount" body={amountBodyTemplate} style={{ minWidth: '10rem' }} className='border-b-2 border-gray-500'/>
-                        <Column field="bpId" header="BP Username" style={{ minWidth: '12rem' }} className='border-b-2 border-gray-500'/>
-                        <Column field="screenshot" header="Attachment" body={imageBodyTemplate} style={{ minWidth: '10rem' }}  className='border-b-2 border-gray-500'/>
-                        <Column field="status" header="Status" body={statusBodyTemplate} style={{ minWidth: '10rem' }} className='border-b-2 border-gray-500'  />
-                        <Column header="Action" body={actionBodyTemplate} style={{ minWidth: '16rem' }} className='border-b-2 border-gray-500' />
                     </DataTable>
 
-                    <Dialog
-                        header="Withdrawal Screenshot"
-                        visible={isDialogVisible}
-                        style={{ width: '50vw' }}
-                        modal
-                        onHide={() => setIsDialogVisible(false)}
-                    >
-                        {selectedImage && (
-                            <img
-                                src={selectedImage}
-                                alt="Withdrawal Screenshot"
-                                className="w-full h-auto object-contain rounded-md"
-                            />
-                        )}
+                    <Dialog header="Withdrawal Screenshot" visible={isDialogVisible} style={{ width: '50vw' }} modal onHide={() => setIsDialogVisible(false)}>
+                        {selectedImage && <img src={selectedImage} alt="Withdrawal Screenshot" className="w-full h-auto object-contain rounded-md" />}
                     </Dialog>
                 </div>
             </div>

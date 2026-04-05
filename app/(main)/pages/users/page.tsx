@@ -5,13 +5,15 @@ import { Column, ColumnFilterClearTemplateOptions, ColumnFilterApplyTemplateOpti
 import { DataTable, DataTableFilterMeta } from 'primereact/datatable';
 import { InputText } from 'primereact/inputtext';
 import { classNames } from 'primereact/utils';
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useContext } from 'react';
 import { deleteUser, getAllUsers, updateUserStatus, UserType } from '@/firebaseUtils';
 import { Toast } from 'primereact/toast';
 import { useRouter } from 'next/navigation';
+import { LayoutContext } from '@/layout/context/layoutcontext';
 
 const Users = () => {
     const [users, setUsers] = useState<UserType[]>([]);
+    const { layoutConfig } = useContext(LayoutContext);
 
     const [loading, setLoading] = useState(true);
     const [filters, setFilters] = useState<DataTableFilterMeta>({});
@@ -171,6 +173,7 @@ const Users = () => {
         });
 
     console.log('Filtered Users:', displayUsers);
+    console.log('theme', layoutConfig.colorScheme);
     return (
         <div className="grid">
             <div className="col-12">
@@ -193,7 +196,7 @@ const Users = () => {
                     <DataTable
                         value={displayUsers}
                         // paginator
-                        className="p-datatable-gridlines"
+                        className={`p-datatable-gridlines ${layoutConfig.colorScheme === 'dark' ? 'custom-dark-table' : 'custom-light-table'}`}
                         showGridlines
                         // rows={10}
                         dataKey="uid"
@@ -205,14 +208,93 @@ const Users = () => {
                         scrollable
                         scrollHeight="60vh"
                     >
-                        <Column field="createdAt" header="Date & Time" body={(rowData) => formatDate(rowData.createdAt)} style={{ minWidth: '14rem' }} className="border-b border-gray-500" />
-                        <Column field="displayName" header="Name" filterPlaceholder="Search by name" style={{ minWidth: '12rem' }} className="border-b border-gray-500" />
-                        <Column field="email" header="Email" filterPlaceholder="Search by email" style={{ minWidth: '15rem' }} className="border-b border-gray-500" />
-                        <Column field="phoneNumber" header="Phone Number" filterPlaceholder="Search by phoneNumber" style={{ minWidth: '15rem' }} className="border-b border-gray-500" />
-                        <Column field="bpUsername" header="BP Username" filterPlaceholder="Search by bpUsername" style={{ minWidth: '15rem' }} className="border-b border-gray-500" />
-                        <Column field="bpPassword" header="BP Password" filterPlaceholder="Search by bpPassword" style={{ minWidth: '15rem' }} className="border-b border-gray-500" />
-                        <Column field="isAccepted" header="Status" body={isAcceptedBodyTemplate} style={{ minWidth: '8rem' }} className="border-b border-gray-500" />
-                        <Column header="Action" body={actionBodyTemplate} headerStyle={{ minWidth: '13rem' }} className="border-b border-gray-500"></Column>
+                        <Column
+                            field="createdAt"
+                            header="Date & Time"
+                            body={(rowData) => formatDate(rowData.createdAt)}
+                            style={{
+                                backgroundColor: layoutConfig.colorScheme === 'dark' ? '#2A323D' : '#ffffff',
+                                color: layoutConfig.colorScheme === 'dark' ? '#ffffff' : '#000000',
+                                minWidth: '14rem'
+                            }}
+                            className="border-b border-gray-500"
+                        />
+                        <Column
+                            field="displayName"
+                            header="Name"
+                            filterPlaceholder="Search by name"
+                            style={{
+                                backgroundColor: layoutConfig.colorScheme === 'dark' ? '#2A323D' : '#ffffff',
+                                color: layoutConfig.colorScheme === 'dark' ? '#ffffff' : '#000000',
+                                minWidth: '12rem'
+                            }}
+                            className="border-b border-gray-500"
+                        />
+                        <Column
+                            field="email"
+                            header="Email"
+                            filterPlaceholder="Search by email"
+                            style={{
+                                backgroundColor: layoutConfig.colorScheme === 'dark' ? '#2A323D' : '#ffffff',
+                                color: layoutConfig.colorScheme === 'dark' ? '#ffffff' : '#000000',
+                                minWidth: '15rem'
+                            }}
+                            className="border-b border-gray-500"
+                        />
+                        <Column
+                            field="phoneNumber"
+                            header="Phone Number"
+                            filterPlaceholder="Search by phoneNumber"
+                            style={{
+                                backgroundColor: layoutConfig.colorScheme === 'dark' ? '#2A323D' : '#ffffff',
+                                color: layoutConfig.colorScheme === 'dark' ? '#ffffff' : '#000000',
+                                minWidth: '15rem'
+                            }}
+                            className="border-b border-gray-500"
+                        />
+                        <Column
+                            field="bpUsername"
+                            header="BP Username"
+                            filterPlaceholder="Search by bpUsername"
+                            style={{
+                                backgroundColor: layoutConfig.colorScheme === 'dark' ? '#2A323D' : '#ffffff',
+                                color: layoutConfig.colorScheme === 'dark' ? '#ffffff' : '#000000',
+                                minWidth: '15rem'
+                            }}
+                            className="border-b border-gray-500"
+                        />
+                        <Column
+                            field="bpPassword"
+                            header="BP Password"
+                            filterPlaceholder="Search by bpPassword"
+                            style={{
+                                backgroundColor: layoutConfig.colorScheme === 'dark' ? '#2A323D' : '#ffffff',
+                                color: layoutConfig.colorScheme === 'dark' ? '#ffffff' : '#000000',
+                                minWidth: '15rem'
+                            }}
+                            className="border-b border-gray-500"
+                        />
+                        <Column
+                            field="isAccepted"
+                            header="Status"
+                            body={isAcceptedBodyTemplate}
+                            style={{
+                                backgroundColor: layoutConfig.colorScheme === 'dark' ? '#2A323D' : '#ffffff',
+                                color: layoutConfig.colorScheme === 'dark' ? '#ffffff' : '#000000',
+                                minWidth: '8rem'
+                            }}
+                            className="border-b border-gray-500"
+                        />
+                        <Column
+                            header="Action"
+                            body={actionBodyTemplate}
+                            headerStyle={{ minWidth: '13rem' }}
+                            style={{
+                                backgroundColor: layoutConfig.colorScheme === 'dark' ? '#2A323D' : '#ffffff',
+                                color: layoutConfig.colorScheme === 'dark' ? '#ffffff' : '#000000'
+                            }}
+                            className="border-b border-gray-500"
+                        ></Column>
                     </DataTable>
                 </div>
             </div>

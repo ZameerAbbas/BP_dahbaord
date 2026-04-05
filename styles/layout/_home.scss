@@ -82,3 +82,16 @@
     align-items: center;
   }
 }
+
+/* Dark Mode */
+.custom-dark-table .p-datatable-thead > tr > th {
+  background-color: #2A323D !important;
+  color: #ffffff !important;
+  border-color: #3f4a5a !important;
+}
+
+/* Light Mode */
+.custom-light-table .p-datatable-thead > tr > th {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+}

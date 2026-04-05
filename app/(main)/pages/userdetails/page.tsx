@@ -4,11 +4,13 @@ import { Column } from 'primereact/column';
 import { DataTable, DataTableFilterMeta } from 'primereact/datatable';
 import { InputText } from 'primereact/inputtext';
 import { classNames } from 'primereact/utils';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { getAllPendingUsers, updateUserStatus, UserType } from '@/firebaseUtils';
 
 import { useRouter } from 'next/navigation';
+import { LayoutContext } from '@/layout/context/layoutcontext';
 const Users = () => {
+    const { layoutConfig } = useContext(LayoutContext);
     const [users, setUsers] = useState<UserType[]>([]);
 
     const [loading, setLoading] = useState(true);
@@ -121,7 +123,7 @@ const Users = () => {
 
                     <DataTable<any>
                         value={displayUsers}
-                        className="p-datatable-gridlines"
+                        className={`p-datatable-gridlines ${layoutConfig.colorScheme === 'dark' ? 'custom-dark-table' : 'custom-light-table'}`}
                         showGridlines
                         dataKey="uid"
                         filters={filters}
@@ -134,7 +136,16 @@ const Users = () => {
                         selection={selectedUsers}
                         onSelectionChange={(e: { value: UserType[] }) => setSelectedUsers(e.value)}
                     >
-                        <Column selectionMode="multiple" headerStyle={{ width: '3rem' }} className="" />
+                        <Column
+                            selectionMode="multiple"
+                          
+                            className=""
+                            headerStyle={{
+                                // backgroundColor: layoutConfig.colorScheme === 'dark' ? 'ffff00' : 'ffff00',
+                                // color: layoutConfig.colorScheme === 'dark' ? '#ffffff' : '#000000',
+                                minWidth: '3rem'
+                            }}
+                        />
                         <Column
                             field="displayName"
                             header="User Name"
@@ -150,19 +161,16 @@ const Users = () => {
                                     {rowData.displayName}
                                 </span>
                             )}
-                            style={{ minWidth: '8rem' ,backgroundColor:'#ffff00'}}
-                           
+                            style={{
+                                backgroundColor: layoutConfig.colorScheme === 'dark' ? 'ffff00' : 'ffff00',
+                                // color: layoutConfig.colorScheme === 'dark' ? '#ffffff' : '#000000',
+                                minWidth: '8rem'
+                            }}
                         />
-                        <Column field="phoneNumber" header="Phone " filterPlaceholder="Search by phoneNumber" style={{ minWidth: '8rem',backgroundColor:"#ffff00" }} />
-                        <Column field="bpUsername" header="BP Username" filterPlaceholder="Search by bpUsername" style={{ minWidth: '8rem' ,backgroundColor:"#ffff00" }}  />
-                        <Column field="bpPassword" header="BP Password" filterPlaceholder="Search by bpPassword" style={{ minWidth: '8rem' ,backgroundColor:"#ffff00"}}  />
-                        <Column
-                            field="isAccepted"
-                            header="Status"
-                            body={isAcceptedBodyTemplate}
-                            style={{ minWidth: '8rem',backgroundColor:"#ffff00" }}
-                         
-                        />
+                        <Column field="phoneNumber" header="Phone " filterPlaceholder="Search by phoneNumber" style={{ minWidth: '8rem', backgroundColor: '#ffff00' }} />
+                        <Column field="bpUsername" header="BP Username" filterPlaceholder="Search by bpUsername" style={{ minWidth: '8rem', backgroundColor: '#ffff00' }} />
+                        <Column field="bpPassword" header="BP Password" filterPlaceholder="Search by bpPassword" style={{ minWidth: '8rem', backgroundColor: '#ffff00' }} />
+                        <Column field="isAccepted" header="Status" body={isAcceptedBodyTemplate} style={{ minWidth: '8rem', backgroundColor: '#ffff00' }} />
                     </DataTable>
                 </div>
             </div>

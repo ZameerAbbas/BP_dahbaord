@@ -72,7 +72,6 @@ export default function UserEditPage() {
         const newErrors: any = {};
 
         if (!user.displayName?.trim()) newErrors.displayName = 'Display Name is required';
-        if (!user.userName?.trim()) newErrors.userName = 'User Name is required';
         if (!user.bpUsername?.trim()) newErrors.bpUsername = 'BP Username is required';
         if (!user.bpPassword?.trim()) newErrors.bpPassword = 'BP Password is required';
         if (!user.phoneNumber?.trim()) newErrors.phoneNumber = 'Phone Number is required';
@@ -155,7 +154,7 @@ export default function UserEditPage() {
                     <div className="col-12 md:col-8">
                         <label className="block font-medium mb-2">User Name</label>
                         <InputText value={user.userName} onChange={(e) => handleChange('userName', e.target.value)} className={`w-full ${errors.userName ? 'border-red-500' : ''}`} />
-                        {errors.userName && <small className="text-red-500">{errors.userName}</small>}
+                    
                     </div>
                     <div className="col-12 md:col-4"></div> {/* Spacer to keep username left-aligned */}
                     {/* Row 3: Email & BP Username */}

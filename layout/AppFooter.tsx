@@ -13,7 +13,7 @@ const AppFooter = () => {
     const opDeposits = useRef<OverlayPanel>(null);
     const opUsers = useRef<OverlayPanel>(null);
 
-      const [configVisible, setConfigVisible] = useState(false);
+    const [configVisible, setConfigVisible] = useState(false);
 
     // Data states
     const [deposits, setDeposits] = useState<OrderType[]>([]);
@@ -35,7 +35,13 @@ const AppFooter = () => {
     const totalPending = deposits.length + withdrawals.length;
 
     return (
-        <div className="layout-footer p-4 flex justify-between items-center relative bg-gray-50">
+        <div
+            className={`layout-footer p-4 flex justify-between items-center relative `}
+            style={{
+                backgroundColor: layoutConfig.colorScheme === 'dark' ? '#2A323D' : '#ffffff',
+            
+            }}
+        >
             {/* <span className="text-sm text-gray-500">© 2026 Your Company</span> */}
 
             {/* MOBILE-ONLY FOOTER SIDEBAR */}
