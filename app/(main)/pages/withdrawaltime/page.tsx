@@ -141,7 +141,7 @@ const WithdrawalTiming = () => {
                     <InputText
                         value={form?.WhatappNumber}
                         onChange={(e) => handleChange('WhatappNumber', e.target.value)}
-                        placeholder="+447..."
+                        placeholder="+92..."
                         className="w-full"
                     />
                 </div>

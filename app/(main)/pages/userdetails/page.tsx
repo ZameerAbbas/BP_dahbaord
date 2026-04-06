@@ -123,7 +123,7 @@ const Users = () => {
 
                     <DataTable<any>
                         value={displayUsers}
-                        className={`p-datatable-gridlines ${layoutConfig.colorScheme === 'dark' ? 'custom-dark-table' : 'custom-light-table'}`}
+                        className={`p-datatable-gridlines  users-table  ${layoutConfig.colorScheme === 'dark' ? 'custom-dark-table' : 'custom-light-table'}`}
                         showGridlines
                         dataKey="uid"
                         filters={filters}
@@ -136,16 +136,7 @@ const Users = () => {
                         selection={selectedUsers}
                         onSelectionChange={(e: { value: UserType[] }) => setSelectedUsers(e.value)}
                     >
-                        <Column
-                            selectionMode="multiple"
-                          
-                            className=""
-                            headerStyle={{
-                                // backgroundColor: layoutConfig.colorScheme === 'dark' ? 'ffff00' : 'ffff00',
-                                // color: layoutConfig.colorScheme === 'dark' ? '#ffffff' : '#000000',
-                                minWidth: '3rem'
-                            }}
-                        />
+                        <Column selectionMode="multiple" headerClassName={layoutConfig.colorScheme === 'dark' ? 'dark-checkbox-header' : 'light-checkbox-header'} style={{ minWidth: '3rem' }} />
                         <Column
                             field="displayName"
                             header="User Name"
@@ -162,7 +153,7 @@ const Users = () => {
                                 </span>
                             )}
                             style={{
-                                backgroundColor: layoutConfig.colorScheme === 'dark' ? 'ffff00' : 'ffff00',
+                                backgroundColor: '#ffff00',
                                 // color: layoutConfig.colorScheme === 'dark' ? '#ffffff' : '#000000',
                                 minWidth: '8rem'
                             }}

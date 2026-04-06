@@ -25,3 +25,14 @@ a {
 .layout-wrapper {
     min-height: 100vh;
 }
+
+.users-table.custom-dark-table .p-datatable-tbody > tr > td {
+   background-color: #ffff00 !important;
+  color: #000000 !important;
+}
+
+.users-table.custom-light-table .p-datatable-tbody > tr > td {
+    background-color: #ffff00 !important;
+    color: #000000 !important;
+}
+
