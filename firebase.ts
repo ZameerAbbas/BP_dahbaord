@@ -6,13 +6,13 @@ import { getStorage } from "firebase/storage";
 
 // Your Firebase config
 const firebaseConfig = {
- apiKey: "AIzaSyBtdEBC5BAwPoYk_DmDnrXn2Kxs-90qTdk",
-  authDomain: "betpro-2f60a.firebaseapp.com",
-  projectId: "betpro-2f60a",
-  storageBucket: "betpro-2f60a.firebasestorage.app",
-  messagingSenderId: "654705922401",
-  appId: "1:654705922401:web:ae4cf0d4a033ba2db5f520",
-  measurementId: "G-1T3ZCSPW1W"
+  apiKey: "AIzaSyBKMzc8wbuHzcV60PoAo3mslll-WHxqoHU",
+  authDomain: "bprolive-2a75e.firebaseapp.com",
+  projectId: "bprolive-2a75e",
+  storageBucket: "bprolive-2a75e.firebasestorage.app",
+  messagingSenderId: "468902535954",
+  appId: "1:468902535954:web:e42e850c15aef8048009cb",
+  measurementId: "G-V5RD85GFYS"
 };
 
 // Initialize
