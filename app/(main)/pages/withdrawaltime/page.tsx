@@ -115,7 +115,7 @@ const WithdrawalTiming = () => {
                 <div className="col-12 md:col-3">
                     <label className="block font-bold mb-2">From Time</label>
                     <Calendar
-                        value={stringToDate(form.fromtime)}
+                        value={stringToDate(form?.fromtime)}
                         onChange={(e) => setForm({ ...form, fromtime: dateToString(e.value as Date) })}
                         timeOnly
                         hourFormat="12"
@@ -127,7 +127,7 @@ const WithdrawalTiming = () => {
                 <div className="col-12 md:col-3">
                     <label className="block font-bold mb-2">To Time</label>
                     <Calendar
-                        value={stringToDate(form.toTime)}
+                        value={stringToDate(form?.toTime)}
                         onChange={(e) => setForm({ ...form, toTime: dateToString(e.value as Date) })}
                         timeOnly
                         hourFormat="12"

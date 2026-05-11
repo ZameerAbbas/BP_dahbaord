@@ -1,64 +1,69 @@
 
 import { db } from './firebase';
-import { ref, get, update, child,remove,onValue, set, push   } from 'firebase/database';
+import { ref, get, update, child, remove, onValue, set, push } from 'firebase/database';
 
- export interface OrderType {
-    id: string;
-    uid: string;
-    accountNumber: string;
-    amount: number;
-    isDeposit: boolean;
-    createdAt: string;
-    notes: string;
-    orderNumber: string;
-    paymentMethod: string;
-    status: string;
-    type: string;
-    screenshot: string;
-    screenshotAdmin: string;
-    updatedAt: string;
-    displayName?: string;
-    userName?: string;
-    bpId?: string;
-    bpPassword?: string;
-    email?: string;
+export interface OrderType {
+  id: string;
+  uid: string;
+  accountNumber: string;
+  amount: number;
+  isDeposit: boolean;
+  createdAt: string;
+  notes: string;
+  orderNumber: string;
+  paymentMethod: string;
+  status: string;
+  type: string;
+  screenshot: string;
+  screenshotAdmin: string;
+  updatedAt: string;
+  displayName?: string;
+  userName?: string;
+  bpId?: string;
+  bpPassword?: string;
+  email?: string;
 }
 
 export interface UserType {
-    uid: string;
-    email: string;
-    displayName: string;
-    userName: string;
-    isAccepted: boolean;
-    isReject: boolean;
-    createdAt: string;
-    isAdmin: boolean;
-    bpPassword: string;
-    bpUsername: string
-    phoneNumber: any;
-    updatedAt: any;
+  uid: string;
+  email: string;
+  displayName: string;
+  userName: string;
+  isAccepted: boolean;
+  isReject: boolean;
+  createdAt: string;
+  isAdmin: boolean;
+  bpPassword: string;
+  bpUsername: string
+  phoneNumber: any;
+  updatedAt: any;
 }
 export interface withdrawalTimeType {
-    uid: string;
-    fromtime: string;
-    toTime: string;
-    WhatappNumber: string;
-    url: string;
+  uid: string;
+  fromtime: string;
+  toTime: string;
+  WhatappNumber: string;
+  url: string;
 
 }
 export interface bankInfoType {
-    uid: string;
-    bankName: string;
-    accountTitle: string;
-    accountNumber: string;
-    category: string;
-    status: boolean;
-    limit: number;
+  uid: string;
+  bankName: string;
+  accountTitle: string;
+  accountNumber: string;
+  category: string;
+  status: boolean;
+  limit: number;
 
 }
 export interface supportType {
-    uid: string;
-    supportNumber: string;
+  uid: string;
+  supportNumber: string;
+}
+
+export interface aleartNoteType {
+  uid: string;
+  alertNote: string;
 }
 
 export const getAllUsers = async () => {
@@ -177,7 +182,7 @@ export const listenDepositOrders = (callback: (deposits: OrderType[]) => void) =
           ...order,
         }))
       )
-      .filter((order: OrderType) => order.isDeposit === true && order.status === "pending" );
+      .filter((order: OrderType) => order.isDeposit === true && order.status === "pending");
 
     callback(depositsList);
   });
@@ -246,7 +251,7 @@ export const listenWithdrawalOrders = (callback: (withdrawals: OrderType[]) => v
           ...order,
         }))
       )
-      .filter((order: OrderType) => order.isDeposit === false && order.status === "pending" );
+      .filter((order: OrderType) => order.isDeposit === false && order.status === "pending");
 
     callback(withdrawalsList);
   });
@@ -267,7 +272,7 @@ export const listenWithdrawalOrdersPending = (callback: (withdrawals: OrderType[
           ...order,
         }))
       )
-      .filter((order: OrderType) => order.isDeposit === false && order.status === "pending" );
+      .filter((order: OrderType) => order.isDeposit === false && order.status === "pending");
 
     callback(withdrawalsList);
   });
@@ -302,41 +307,41 @@ export const listenWithdrawalOrdersPendingByUserID = (
 };
 
 export const updateOrderStatus = async (uid: string, orderId: string, newStatus: string) => {
-    const orderRef = ref(db, `orders/${uid}/${orderId}`);
-    await update(orderRef, { status: newStatus });
-    console.log(`Order ${orderId} of user ${uid} updated with status=${newStatus}`);
+  const orderRef = ref(db, `orders/${uid}/${orderId}`);
+  await update(orderRef, { status: newStatus });
+  console.log(`Order ${orderId} of user ${uid} updated with status=${newStatus}`);
 };
 
 
 
 export const getOrderById = async (uid: string, orderId: string) => {
-    try {
-        const snapshot = await get(ref(db, `orders/${uid}/${orderId}`));
+  try {
+    const snapshot = await get(ref(db, `orders/${uid}/${orderId}`));
 
-        if (snapshot.exists()) {
-            return snapshot.val();
-        } else {
-            return null;
-        }
-    } catch (error) {
-        console.error('Error fetching order:', error);
-        throw error;
+    if (snapshot.exists()) {
+      return snapshot.val();
+    } else {
+      return null;
     }
+  } catch (error) {
+    console.error('Error fetching order:', error);
+    throw error;
+  }
 };
 export const updateOrder = async (uid: string, orderId: string, data: OrderType) => {
-    try {
+  try {
 
-           const orderRef = ref(db, `orders/${uid}/${orderId}`);
-        const { id, ...payload } = data;
-        payload.updatedAt = new Date().toISOString()
+    const orderRef = ref(db, `orders/${uid}/${orderId}`);
+    const { id, ...payload } = data;
+    payload.updatedAt = new Date().toISOString()
 
-        await update(orderRef, data);
+    await update(orderRef, data);
 
-        console.log("Order updated successfully");
-    } catch (error) {
-        console.error("Error updating order:", error);
-        throw error;
-    }
+    console.log("Order updated successfully");
+  } catch (error) {
+    console.error("Error updating order:", error);
+    throw error;
+  }
 };
 export const createWithdrawalTime = async (data: withdrawalTimeType) => {
   try {
@@ -345,7 +350,7 @@ export const createWithdrawalTime = async (data: withdrawalTimeType) => {
 
     const payload = {
       ...data,
-      uid: newRef.key, // generate UID
+      uid: newRef.key,
     };
 
     await set(newRef, payload);
@@ -471,3 +476,47 @@ export const getBankById = async (uid: string) => {
 };
 
 
+
+
+
+export const createAleartNote = async (data: aleartNoteType) => {
+  try {
+    const aleartNoteRef = ref(db, "aleartNotes");
+    const newRef = push(aleartNoteRef);
+
+    const payload = {
+      ...data,
+      uid: newRef.key,
+    };
+
+    await set(newRef, payload);
+
+    return payload;
+  } catch (error) {
+    console.error("Error creating aleart note:", error);
+    throw error;
+  }
+};
+
+export const getAllAleartNotes = async (): Promise<
+  Record<string, aleartNoteType>
+> => {
+  try {
+    const aleartNoteRef = ref(db, "aleartNotes");
+    const snapshot = await get(aleartNoteRef);
+
+    if (snapshot.exists()) {
+      return snapshot.val();
+    }
+
+    return {};
+  } catch (error) {
+    console.error("Error fetching aleart notes:", error);
+    throw error;
+  }
+};
+
+export const updateAleartNote = async (uid: string, data: any) => {
+  const refPath = ref(db, `aleartNotes/${uid}`);
+  await update(refPath, data);
+};

@@ -51,6 +51,10 @@ const AppMenu = () => {
         {
             label: '',
             items: [{ label: 'Support', icon: 'pi pi-fw pi-phone', to: '/pages/support' }]
+        },
+         {
+            label: '',
+            items: [{ label: 'Alert Notes', icon: 'pi pi-fw pi-bell', to: '/pages/alertNote' }]
         }
     ];
 
