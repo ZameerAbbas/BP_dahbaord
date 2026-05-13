@@ -49,18 +49,38 @@ const WithdrawalDetailsPage = ({
     };
 
     console.log('Form State:', form);
+    const [imageSize, setImageSize] = useState<string>('');
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
+
         if (!file || !form) return;
 
+        // Convert bytes to KB / MB
+        const sizeInKB = file.size / 1024;
+        const sizeInMB = sizeInKB / 1024;
+
+        const formattedSize = sizeInMB >= 1 ? `${sizeInMB.toFixed(2)} MB` : `${sizeInKB.toFixed(2)} KB`;
+
+        setImageSize(formattedSize);
+
         const reader = new FileReader();
+
         reader.onload = () => {
             const base64 = reader.result as string;
 
-            setForm((prev) => (prev ? { ...prev, screenshotAdmin: base64 } : prev));
+            setForm((prev) =>
+                prev
+                    ? {
+                          ...prev,
+                          screenshotAdmin: base64
+                      }
+                    : prev
+            );
+
             setPreview(base64);
         };
+
         reader.readAsDataURL(file);
     };
 
@@ -134,7 +154,7 @@ const WithdrawalDetailsPage = ({
 
                 {/* Upload Screenshot */}
                 <div className="col-12">
-                    <label>Upload Screenshot</label>
+                    <label>{imageSize ? `Upload Screenshot (${imageSize})` : 'Upload Screenshot'}</label>
                     <input type="file" accept="image/*" onChange={handleImageChange} className="w-full" />
                 </div>
 
