@@ -51,12 +51,45 @@ const WithdrawalDetailsPage = ({
     console.log('Form State:', form);
     const [imageSize, setImageSize] = useState<string>('');
 
-    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
+    // const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    //     const file = e.target.files?.[0];
 
+    //     if (!file || !form) return;
+
+    //     // Convert bytes to KB / MB
+    //     const sizeInKB = file.size / 1024;
+    //     const sizeInMB = sizeInKB / 1024;
+
+    //     const formattedSize = sizeInMB >= 1 ? `${sizeInMB.toFixed(2)} MB` : `${sizeInKB.toFixed(2)} KB`;
+
+    //     setImageSize(formattedSize);
+
+    //     const reader = new FileReader();
+
+    //     reader.onload = () => {
+    //         const base64 = reader.result as string;
+
+    //         setForm((prev) =>
+    //             prev
+    //                 ? {
+    //                       ...prev,
+    //                       screenshotAdmin: base64
+    //                   }
+    //                 : prev
+    //         );
+
+    //         setPreview(base64);
+    //     };
+
+    //     reader.readAsDataURL(file);
+    // };
+
+    const [dragActive, setDragActive] = useState(false);
+
+    const processFile = (file: File) => {
         if (!file || !form) return;
 
-        // Convert bytes to KB / MB
+        // Image Size
         const sizeInKB = file.size / 1024;
         const sizeInMB = sizeInKB / 1024;
 
@@ -64,6 +97,7 @@ const WithdrawalDetailsPage = ({
 
         setImageSize(formattedSize);
 
+        // Convert to Base64
         const reader = new FileReader();
 
         reader.onload = () => {
@@ -82,6 +116,41 @@ const WithdrawalDetailsPage = ({
         };
 
         reader.readAsDataURL(file);
+    };
+
+    const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+
+        if (!file) return;
+
+        processFile(file);
+    };
+
+    const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        setDragActive(false);
+
+        const file = e.dataTransfer.files?.[0];
+
+        if (!file) return;
+
+        processFile(file);
+    };
+
+    const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        setDragActive(true);
+    };
+
+    const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+
+        setDragActive(false);
     };
 
     const handleSubmit = async () => {
@@ -133,6 +202,17 @@ const WithdrawalDetailsPage = ({
                                 <strong>Amount:</strong> PKR {form.amount || 0}
                             </p>
                         </div>
+                        <div className="col-12 md:col-6">
+                            <p>
+                                <strong>BP User:</strong> {form.bpId || '-'}
+                            </p>
+                        </div>
+
+                        <div className="col-12 md:col-6">
+                            <p>
+                                <strong>Order Number:</strong> {form.orderNumber || '-'}
+                            </p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -147,36 +227,72 @@ const WithdrawalDetailsPage = ({
                 </div>
 
                 {/* Notes */}
-                <div className="col-12">
-                    <label>Notes</label>
-                    <InputTextarea value={form.notes} onChange={(e) => handleChange('notes', e.target.value)} rows={3} className="w-full" />
-                </div>
-
+                {/* Upload Screenshot */}
                 {/* Upload Screenshot */}
                 <div className="col-12">
-                    <label>{imageSize ? `Upload Screenshot (${imageSize})` : 'Upload Screenshot'}</label>
-                    <input type="file" accept="image/*" onChange={handleImageChange} className="w-full" />
-                </div>
+                    <label className="block mb-2 font-medium">{imageSize ? `Attachment (${imageSize})` : 'Attachment'}</label>
 
-                {/* Preview */}
-                {preview && (
-                    <div className="col-12">
-                        <label>Preview</label>
-                        <img
-                            src={preview}
-                            alt="preview"
-                            style={{
-                                width: '200px',
-                                height: '200px',
-                                borderRadius: '12px',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                transition: 'all 0.3s ease'
-                            }}
-                        />
+                    <div
+                        onClick={() => document.getElementById('screenshot-upload')?.click()}
+                        onDrop={handleDrop}
+                        onDragOver={handleDragOver}
+                        onDragLeave={handleDragLeave}
+                        style={{
+                            border: dragActive ? '2px dashed #3b82f6' : '1px solid #d1d5db',
+                            borderRadius: '10px',
+                            minHeight: '260px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            overflow: 'hidden',
+                            position: 'relative',
+                            background: dragActive ? '#eff6ff' : '#fff',
+                            transition: 'all 0.3s ease'
+                        }}
+                    >
+                        <input id="screenshot-upload" type="file" accept="image/*" onChange={handleImageChange} hidden />
+
+                        {preview ? (
+                            <div className='p-4'>
+
+                            <img
+                                src={preview}
+                                alt="preview"
+                                style={{
+                                    width: '80%',
+                                    height: '250px',
+                                    objectFit: 'contain'
+                                }}
+                                />
+                                </div>
+                        ) : (
+                            <div
+                                style={{
+                                    textAlign: 'center',
+                                    color: '#9ca3af'
+                                }}
+                            >
+                                <i
+                                    className="pi pi-cloud-upload"
+                                    style={{
+                                        fontSize: '3rem',
+                                        marginBottom: '10px',
+                                        display: 'block'
+                                    }}
+                                />
+
+                                <span
+                                    style={{
+                                        fontSize: '16px'
+                                    }}
+                                >
+                                    Drag and drop a file here or click
+                                </span>
+                            </div>
+                        )}
                     </div>
-                )}
+                </div>
             </div>
 
             <div className="flex justify-center mt-4">
