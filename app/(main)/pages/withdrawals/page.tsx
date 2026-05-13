@@ -24,8 +24,7 @@ interface UserType {
 }
 
 const Withdrawals = () => {
-
-        const { layoutConfig } = useContext(LayoutContext);
+    const { layoutConfig } = useContext(LayoutContext);
     const [withdrawals, setWithdrawals] = useState<OrderType[]>([]);
     const [users, setUsers] = useState<Map<string, UserType>>(new Map());
     const [loading, setLoading] = useState(true);
@@ -150,9 +149,10 @@ const Withdrawals = () => {
 
     const actionBodyTemplate = (rowData: OrderType) => {
         const isApprovalPending = rowData.status === 'pending';
+        console.log('Rendering action buttons for order:', rowData.id, 'with status:', rowData);
         return (
             <div className="flex gap-2">
-                <Button label="Approve" icon="pi pi-check" className="p-button-rounded p-button-success p-button-sm" onClick={() => handleApprove(rowData)} disabled={!isApprovalPending} />
+                <Button label="Approve" icon="pi pi-check" className="p-button-rounded p-button-success p-button-sm" onClick={(e) => handleApprove(e, rowData)} disabled={!isApprovalPending} />
                 <Button label="Reject" icon="pi pi-times" className="p-button-rounded p-button-danger p-button-sm" onClick={() => handleReject(rowData)} disabled={!isApprovalPending} />
             </div>
         );
@@ -184,19 +184,33 @@ const Withdrawals = () => {
         };
     }, []);
 
-    const handleApprove = async (order: OrderType) => {
-        try {
-            localStorage.setItem(
-                'orderInfo',
-                JSON.stringify({
-                    uid: order.uid,
-                    orderId: order.id
-                })
-            );
+    // const handleApprove = async (order: OrderType) => {
+    //     try {
+    //         localStorage.setItem(
+    //             'orderInfo',
+    //             JSON.stringify({
+    //                 uid: order.uid,
+    //                 orderId: order.id
+    //             })
+    //         );
 
-            router.push('/pages/updatewithdrawals');
-        } catch (error) {
-            console.error('Error approving order:', error);
+    //         router.push('/pages/updatewithdrawals');
+    //     } catch (error) {
+    //         console.error('Error approving order:', error);
+    //     }
+    // };
+    const handleApprove = (e: React.MouseEvent, order?: OrderType) => {
+        if (!order?.id) {
+            console.log('Order missing:', order);
+            return;
+        }
+
+        const url = `/pages/withdrawals/${order.id}/${order.uid}`;
+
+        if (e.ctrlKey || e.metaKey) {
+            window.open(url, '_blank');
+        } else {
+            router.push(url);
         }
     };
 
@@ -223,8 +237,7 @@ const Withdrawals = () => {
                     <DataTable
                         value={filteredWithdrawals}
                         // paginator
-                                            className={`p-datatable-gridlines ${layoutConfig.colorScheme === 'dark' ? 'custom-dark-table' : 'custom-light-table'}`}
-
+                        className={`p-datatable-gridlines ${layoutConfig.colorScheme === 'dark' ? 'custom-dark-table' : 'custom-light-table'}`}
                         showGridlines
                         // rows={10}
                         dataKey="id"
@@ -237,53 +250,90 @@ const Withdrawals = () => {
                         scrollHeight="60vh"
                         // pag
                     >
-                        <Column field="createdAt" header="Date & Time" body={(rowData) => formatDate(rowData.createdAt)}  style={{
+                        <Column
+                            field="createdAt"
+                            header="Date & Time"
+                            body={(rowData) => formatDate(rowData.createdAt)}
+                            style={{
                                 backgroundColor: layoutConfig.colorScheme === 'dark' ? '#2A323D' : '#ffffff',
                                 color: layoutConfig.colorScheme === 'dark' ? '#ffffff' : '#000000',
-                            minWidth: '14rem'
-                            }} className="border-b-2 border-gray-500" />
-                        <Column field="userName" header="Customer Name" filterPlaceholder="Search by name"  style={{
-                                backgroundColor: layoutConfig.colorScheme === 'dark' ? '#2A323D' : '#ffffff',
-                                color: layoutConfig.colorScheme === 'dark' ? '#ffffff' : '#000000',
-                            minWidth: '12rem'
-                            }} className="border-b-2 border-gray-500" />
-                        <Column field="accountNumber" header="Phone"  style={{
-                                backgroundColor: layoutConfig.colorScheme === 'dark' ? '#2A323D' : '#ffffff',
-                                color: layoutConfig.colorScheme === 'dark' ? '#ffffff' : '#000000',
-                            minWidth: '12rem'
-                            }} className="border-b-2 border-gray-500" />
-                        <Column field="amount" header="Amount" body={amountBodyTemplate}  style={{
-                                backgroundColor: layoutConfig.colorScheme === 'dark' ? '#2A323D' : '#ffffff',
-                                color: layoutConfig.colorScheme === 'dark' ? '#ffffff' : '#000000',
-                            minWidth: '10rem'
-                            }} className="border-b-2 border-gray-500" />
-                        <Column field="bpId" header="BP Username"  style={{
-                                backgroundColor: layoutConfig.colorScheme === 'dark' ? '#2A323D' : '#ffffff',
-                                color: layoutConfig.colorScheme === 'dark' ? '#ffffff' : '#000000',
-                            minWidth: '12rem'
-                            }}className="border-b-2 border-gray-500" />
-                        <Column field="screenshot" header="Attachment" body={imageBodyTemplate} 
-                         style={{
-                                backgroundColor: layoutConfig.colorScheme === 'dark' ? '#2A323D' : '#ffffff',
-                                color: layoutConfig.colorScheme === 'dark' ? '#ffffff' : '#000000',
-                            minWidth: '10rem'
+                                minWidth: '14rem'
                             }}
-                        className="border-b-2 border-gray-500" />
-                        <Column field="status" header="Status" body={statusBodyTemplate} 
-                         style={{
+                            className="border-b-2 border-gray-500"
+                        />
+                        <Column
+                            field="userName"
+                            header="Customer Name"
+                            filterPlaceholder="Search by name"
+                            style={{
                                 backgroundColor: layoutConfig.colorScheme === 'dark' ? '#2A323D' : '#ffffff',
                                 color: layoutConfig.colorScheme === 'dark' ? '#ffffff' : '#000000',
-                            minWidth: '10rem'
+                                minWidth: '12rem'
                             }}
-                        
-                        className="border-b-2 border-gray-500" />
-                        <Column header="Action" body={actionBodyTemplate}  className="border-b-2 border-gray-500" 
-                           style={{
+                            className="border-b-2 border-gray-500"
+                        />
+                        <Column
+                            field="accountNumber"
+                            header="Phone"
+                            style={{
                                 backgroundColor: layoutConfig.colorScheme === 'dark' ? '#2A323D' : '#ffffff',
                                 color: layoutConfig.colorScheme === 'dark' ? '#ffffff' : '#000000',
-                            minWidth: '16rem'
+                                minWidth: '12rem'
                             }}
-                        
+                            className="border-b-2 border-gray-500"
+                        />
+                        <Column
+                            field="amount"
+                            header="Amount"
+                            body={amountBodyTemplate}
+                            style={{
+                                backgroundColor: layoutConfig.colorScheme === 'dark' ? '#2A323D' : '#ffffff',
+                                color: layoutConfig.colorScheme === 'dark' ? '#ffffff' : '#000000',
+                                minWidth: '10rem'
+                            }}
+                            className="border-b-2 border-gray-500"
+                        />
+                        <Column
+                            field="bpId"
+                            header="BP Username"
+                            style={{
+                                backgroundColor: layoutConfig.colorScheme === 'dark' ? '#2A323D' : '#ffffff',
+                                color: layoutConfig.colorScheme === 'dark' ? '#ffffff' : '#000000',
+                                minWidth: '12rem'
+                            }}
+                            className="border-b-2 border-gray-500"
+                        />
+                        <Column
+                            field="screenshot"
+                            header="Attachment"
+                            body={imageBodyTemplate}
+                            style={{
+                                backgroundColor: layoutConfig.colorScheme === 'dark' ? '#2A323D' : '#ffffff',
+                                color: layoutConfig.colorScheme === 'dark' ? '#ffffff' : '#000000',
+                                minWidth: '10rem'
+                            }}
+                            className="border-b-2 border-gray-500"
+                        />
+                        <Column
+                            field="status"
+                            header="Status"
+                            body={statusBodyTemplate}
+                            style={{
+                                backgroundColor: layoutConfig.colorScheme === 'dark' ? '#2A323D' : '#ffffff',
+                                color: layoutConfig.colorScheme === 'dark' ? '#ffffff' : '#000000',
+                                minWidth: '10rem'
+                            }}
+                            className="border-b-2 border-gray-500"
+                        />
+                        <Column
+                            header="Action"
+                            body={actionBodyTemplate}
+                            className="border-b-2 border-gray-500"
+                            style={{
+                                backgroundColor: layoutConfig.colorScheme === 'dark' ? '#2A323D' : '#ffffff',
+                                color: layoutConfig.colorScheme === 'dark' ? '#ffffff' : '#000000',
+                                minWidth: '16rem'
+                            }}
                         />
                     </DataTable>
 

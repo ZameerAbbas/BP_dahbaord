@@ -1,34 +1,34 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { Dropdown } from 'primereact/dropdown';
-import { Button } from 'primereact/button';
-import { InputTextarea } from 'primereact/inputtextarea';
-
-import { ref, get, update, child } from 'firebase/database';
-import { db } from '@/firebase'; // your firebase config
-import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { getOrderById, OrderType, updateOrder } from '@/firebaseUtils';
+import { useRouter } from 'next/navigation';
+import { Button } from 'primereact/button';
+
+import { Dropdown } from 'primereact/dropdown';
+import { InputTextarea } from 'primereact/inputtextarea';
 
 const statusOptions = [
     { label: 'Approved', value: 'approved' },
     { label: 'Rejected', value: 'rejected' }
 ];
 
-const UpdateOrder = () => {
+const WithdrawalDetailsPage = ({
+    params
+}: {
+    params: {
+        id: string;
+        uid: string;
+    };
+}) => {
+    const orderId = params.id;
+    const uid = params.uid;
     const router = useRouter();
 
     const [form, setForm] = useState<OrderType | null>(null);
     const [loading, setLoading] = useState(false);
 
     const [preview, setPreview] = useState<string>('');
-
-    const orderInfo = localStorage.getItem('orderInfo') ? JSON.parse(localStorage.getItem('orderInfo') as string) : null;
-
-    const uid = orderInfo?.uid;
-    const orderId = orderInfo?.orderId;
-
-    console.log('Order Info from Local Storage:', orderInfo);
 
     useEffect(() => {
         if (!orderId) return;
@@ -37,21 +37,18 @@ const UpdateOrder = () => {
             const data = await getOrderById(uid, orderId);
 
             console.log('Fetched Order Data:', data);
-
-            if (data) {
-                setForm({ ...data, id: orderId, uid: uid });
-                setPreview(data.screenshotAdmin || '');
-            }
+            setForm({ ...data, id: orderId, uid: uid });
+            setPreview(data.screenshotAdmin || '');
         };
 
         fetchOrder();
-    }, [orderId]);
-    console.log('Form State:', form);
-
+    }, [orderId, uid]);
     const handleChange = (field: keyof OrderType, value: any) => {
         if (!form) return;
         setForm({ ...form, [field]: value });
     };
+
+    console.log('Form State:', form);
 
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -120,41 +117,53 @@ const UpdateOrder = () => {
                 </div>
             </div>
 
-            {/* Upload Screenshot */}
-            <div className="col-12">
-                <label>Upload Screenshot</label>
+            <h2 className="text-center text-xl font-bold mb-4">Update Order</h2>
 
-                <input type="file" accept="image/*" onChange={handleImageChange} className="w-full" />
-
-                <small className="text-gray-500 block mt-2">Recommended image size: 800 × 800 px or less than 2MB</small>
-            </div>
-
-            {/* Preview */}
-            {preview && (
+            <div className="grid">
+                {/* Status */}
                 <div className="col-12">
-                    <label className="block mb-2">Preview</label>
+                    <label>Status</label>
+                    <Dropdown value={form.status} options={statusOptions} onChange={(e) => handleChange('status', e.value)} placeholder="Select Status" className="w-full" />
+                </div>
 
-                    <div
-                        className="border-round-xl overflow-hidden border-1 surface-border"
-                        style={{
-                            width: '220px'
-                        }}
-                    >
+                {/* Notes */}
+                <div className="col-12">
+                    <label>Notes</label>
+                    <InputTextarea value={form.notes} onChange={(e) => handleChange('notes', e.target.value)} rows={3} className="w-full" />
+                </div>
+
+                {/* Upload Screenshot */}
+                <div className="col-12">
+                    <label>Upload Screenshot</label>
+                    <input type="file" accept="image/*" onChange={handleImageChange} className="w-full" />
+                </div>
+
+                {/* Preview */}
+                {preview && (
+                    <div className="col-12">
+                        <label>Preview</label>
                         <img
                             src={preview}
                             alt="preview"
                             style={{
-                                width: '100%',
-                                height: '220px',
-                                objectFit: 'cover',
-                                display: 'block'
+                                width: '200px',
+                                height: '200px',
+                                borderRadius: '12px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                transition: 'all 0.3s ease'
                             }}
                         />
                     </div>
-                </div>
-            )}
+                )}
+            </div>
+
+            <div className="flex justify-center mt-4">
+                <Button label="Update Order" loading={loading} onClick={handleSubmit} />
+            </div>
         </div>
     );
 };
 
-export default UpdateOrder;
+export default WithdrawalDetailsPage;
