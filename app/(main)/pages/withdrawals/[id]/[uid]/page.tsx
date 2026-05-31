@@ -30,6 +30,8 @@ const WithdrawalDetailsPage = ({
 
     const [preview, setPreview] = useState<string>('');
 
+    console.log('form:', form);
+
     useEffect(() => {
         if (!orderId) return;
 
@@ -193,7 +195,7 @@ const WithdrawalDetailsPage = ({
 
                         <div className="col-12 md:col-6">
                             <p>
-                                <strong>Method:</strong> {form.paymentMethod || '-'}
+                                <strong>Method:</strong> {form.paymentMethod || '-'}   ({form.bankName?.toUpperCase() || ' '})
                             </p>
                         </div>
 

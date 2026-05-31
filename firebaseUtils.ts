@@ -12,6 +12,7 @@ export interface OrderType {
   notes: string;
   orderNumber: string;
   paymentMethod: string;
+  bankName: string;
   status: string;
   type: string;
   screenshot: string;

@@ -49,6 +49,8 @@ const Withdrawals = () => {
         setGlobalFilterValue(value);
     };
 
+    console.log('Withdrawals component rendered with withdrawals:', withdrawals);
+
     const renderHeader = () => {
         return (
             <div className="responsive-flex" style={{ marginBottom: '1.5rem' }}>
