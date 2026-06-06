@@ -45,6 +45,7 @@ export interface withdrawalTimeType {
   toTime: string;
   WhatappNumber: string;
   url: string;
+  activeTime: boolean;
 
 }
 export interface bankInfoType {

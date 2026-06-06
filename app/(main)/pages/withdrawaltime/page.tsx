@@ -4,15 +4,9 @@ import React, { useEffect, useState } from 'react';
 import { InputText } from 'primereact/inputtext';
 import { Button } from 'primereact/button';
 
-import {
-    getAllWithdrawalTimes,
-    createWithdrawalTime,
-    withdrawalTimeType,
-    updateWithdrawalTime
-} from '@/firebaseUtils';
+import { getAllWithdrawalTimes, createWithdrawalTime, withdrawalTimeType, updateWithdrawalTime } from '@/firebaseUtils';
 import { Calendar } from 'primereact/calendar';
-
-
+import { InputSwitch } from 'primereact/inputswitch';
 
 const WithdrawalTiming = () => {
     const [form, setForm] = useState<withdrawalTimeType>({
@@ -20,7 +14,8 @@ const WithdrawalTiming = () => {
         fromtime: '',
         toTime: '',
         WhatappNumber: '',
-        url: ''
+        url: '',
+        activeTime: false
     });
 
     const [loading, setLoading] = useState(true);
@@ -45,11 +40,12 @@ const WithdrawalTiming = () => {
     }, []);
 
     // ✅ Handle change
-    const handleChange = (field: keyof withdrawalTimeType, value: string) => {
-        setForm({ ...form, [field]: value });
+    const handleChange = (field: keyof withdrawalTimeType, value: string | boolean) => {
+        setForm((prev) => ({
+            ...prev,
+            [field]: value
+        }));
     };
-
-
 
     // ✅ Convert "02:59 PM" string from Firebase back to JS Date for the Calendar
     const stringToDate = (timeString: string) => {
@@ -83,7 +79,6 @@ const WithdrawalTiming = () => {
     };
 
     const handleSubmit = async () => {
-
         try {
             if (isEdit && form.uid) {
                 // Update existing support
@@ -111,58 +106,34 @@ const WithdrawalTiming = () => {
             <h3 className="mb-4 text-xl font-bold">Withdrawals Timing</h3>
 
             <div className="grid">
-
                 <div className="col-12 md:col-3">
                     <label className="block font-bold mb-2">From Time</label>
-                    <Calendar
-                        value={stringToDate(form?.fromtime)}
-                        onChange={(e) => setForm({ ...form, fromtime: dateToString(e.value as Date) })}
-                        timeOnly
-                        hourFormat="12"
-                        placeholder="Select Start Time"
-                        showIcon
-                    />
+                    <Calendar value={stringToDate(form?.fromtime)} onChange={(e) => setForm({ ...form, fromtime: dateToString(e.value as Date) })} timeOnly hourFormat="12" placeholder="Select Start Time" showIcon />
                 </div>
 
                 <div className="col-12 md:col-3">
                     <label className="block font-bold mb-2">To Time</label>
-                    <Calendar
-                        value={stringToDate(form?.toTime)}
-                        onChange={(e) => setForm({ ...form, toTime: dateToString(e.value as Date) })}
-                        timeOnly
-                        hourFormat="12"
-                        placeholder="Select End Time"
-                        showIcon
-                    />
+                    <Calendar value={stringToDate(form?.toTime)} onChange={(e) => setForm({ ...form, toTime: dateToString(e.value as Date) })} timeOnly hourFormat="12" placeholder="Select End Time" showIcon />
                 </div>
 
                 <div className="col-12 md:col-3">
                     <label>WhatsApp Number</label>
-                    <InputText
-                        value={form?.WhatappNumber}
-                        onChange={(e) => handleChange('WhatappNumber', e.target.value)}
-                        placeholder="+92..."
-                        className="w-full"
-                    />
+                    <InputText value={form?.WhatappNumber} onChange={(e) => handleChange('WhatappNumber', e.target.value)} placeholder="+92..." className="w-full" />
                 </div>
 
                 <div className="col-12 md:col-3">
                     <label>URL</label>
-                    <InputText
-                        value={form?.url}
-                        onChange={(e) => handleChange('url', e.target.value)}
-                        placeholder="https://..."
-                        className="w-full"
-                    />
+                    <InputText value={form?.url} onChange={(e) => handleChange('url', e.target.value)} placeholder="https://..." className="w-full" />
                 </div>
+                <div className="col-12 md:col-3">
+                    <label htmlFor="activeTime">Active Time</label>
 
+                    <InputSwitch id="activeTime" checked={form?.activeTime || false} onChange={(e) => handleChange('activeTime', e.value)} />
+                </div>
             </div>
 
             <div className="mt-4">
-                <Button
-                    label={isEdit ? 'Update' : 'Submit'}
-                    onClick={handleSubmit}
-                />
+                <Button label={isEdit ? 'Update' : 'Submit'} onClick={handleSubmit} />
             </div>
         </div>
     );
