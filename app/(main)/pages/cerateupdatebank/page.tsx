@@ -14,45 +14,6 @@ import {
 
 import { useRouter } from 'next/navigation';
 
-
-
-const bankOptions = [
-
-    { label: 'EasyPaisa', value: 'EasyPaisa' },
-    { label: 'JazzCash', value: 'JazzCash' },
-    { label: 'SadaPay', value: 'SadaPay' },
-    { label: 'NayaPay', value: 'NayaPay' },
-
-    { label: 'National Bank of Pakistan (NBP)', value: 'NBP' },
-    { label: 'Habib Bank Limited (HBL)', value: 'HBL' },
-    { label: 'United Bank Limited (UBL)', value: 'UBL' },
-    { label: 'MCB Bank', value: 'MCB' },
-    { label: 'Allied Bank Limited (ABL)', value: 'ABL' },
-    { label: 'Bank Alfalah', value: 'Bank Alfalah' },
-    { label: 'Faysal Bank', value: 'Faysal Bank' },
-    { label: 'Askari Bank', value: 'Askari Bank' },
-
-    { label: 'Meezan Bank', value: 'Meezan Bank' },
-    { label: 'Bank Islami', value: 'Bank Islami' },
-    { label: 'Dubai Islamic Bank Pakistan', value: 'Dubai Islamic' },
-    { label: 'Al Baraka Bank Pakistan', value: 'Al Baraka' },
-
-    { label: 'Standard Chartered Bank Pakistan', value: 'Standard Chartered' },
-    { label: 'Habib Metropolitan Bank', value: 'Habib Metropolitan' },
-    { label: 'Silk Bank', value: 'Silk Bank' },
-    { label: 'Soneri Bank', value: 'Soneri Bank' },
-    { label: 'JS Bank', value: 'JS Bank' },
-    { label: 'Summit Bank', value: 'Summit Bank' },
-    { label: 'Bank of Punjab (BOP)', value: 'BOP' },
-    { label: 'Bank of Khyber (BOK)', value: 'BOK' },
-
-    { label: 'Telenor Microfinance Bank', value: 'Telenor Microfinance' },
-    { label: 'U Microfinance Bank (U Bank)', value: 'U Bank' },
-    { label: 'Khushhali Microfinance Bank', value: 'Khushhali Bank' },
-    { label: 'FINCA Microfinance Bank', value: 'FINCA' },
-    { label: 'Mobilink Microfinance Bank', value: 'Mobilink Bank' }
-];
-
 const categoryOptions = [
     { label: 'EasyPaisa', value: 'EasyPaisa' },
     { label: 'JazzCash', value: 'JazzCash' },
@@ -83,8 +44,6 @@ const CreateUpdateBank = () => {
     const id = localStorage.getItem('bankId') ? JSON.parse(localStorage.getItem('bankId') as string) : null;
     const isEdit = !!id;
 
-
-
     useEffect(() => {
         if (!id) return;
 
@@ -100,7 +59,6 @@ const CreateUpdateBank = () => {
         setForm({ ...form, [field]: value });
     };
 
-    // ✅ Submit
     const handleSubmit = async () => {
         try {
             setLoading(true);
@@ -132,11 +90,10 @@ const CreateUpdateBank = () => {
                 {/* Bank Name */}
                 <div className="col-12">
                     <label>Bank Name</label>
-                    <Dropdown
+                    <InputText
                         value={form.bankName}
-                        options={bankOptions}
-                        onChange={(e) => handleChange('bankName', e.value)}
-                        placeholder="Select Bank"
+                        onChange={(e) => handleChange('bankName', e.target.value)}
+                        placeholder="Enter bank name"
                         className="w-full"
                     />
                 </div>
