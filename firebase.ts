@@ -5,6 +5,7 @@ import { getDatabase } from "firebase/database";
 import { getStorage } from "firebase/storage";
 
 // Your Firebase config
+
 const firebaseConfig = {
   apiKey: "AIzaSyBtdEBC5BAwPoYk_DmDnrXn2Kxs-90qTdk",
   authDomain: "betpro-2f60a.firebaseapp.com",
@@ -15,6 +16,7 @@ const firebaseConfig = {
   appId: "1:654705922401:web:ae4cf0d4a033ba2db5f520",
   measurementId: "G-1T3ZCSPW1W"
 };
+
 
 // Initialize
 const app = initializeApp(firebaseConfig);

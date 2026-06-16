@@ -7,6 +7,7 @@ import { Button } from 'primereact/button';
 import { Password } from 'primereact/password';
 import { InputText } from 'primereact/inputtext';
 import { classNames } from 'primereact/utils';
+
 import {
     signInWithEmailAndPassword,
     createUserWithEmailAndPassword,
@@ -15,6 +16,7 @@ import {
     browserSessionPersistence,
     updateProfile
 } from 'firebase/auth';
+
 import { ref, set } from 'firebase/database';
 import { auth, db } from '../../firebase';
 import { LayoutContext } from '../../layout/context/layoutcontext';
@@ -23,7 +25,8 @@ const SignUpPage = () => {
     const { layoutConfig } = useContext(LayoutContext);
     const router = useRouter();
 
-    const [isSignup, setIsSignup] = useState(false);
+    // 🔥 START IN SIGNUP MODE
+    const [isSignup, setIsSignup] = useState(true);
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -40,26 +43,38 @@ const SignUpPage = () => {
     );
 
     const handleAuth = async () => {
+        if (!email || !password) {
+            setError('Email and password are required');
+            return;
+        }
+
         setError(null);
         setLoading(true);
 
         try {
-            await setPersistence(auth, checked ? browserLocalPersistence : browserSessionPersistence);
+            await setPersistence(
+                auth,
+                checked ? browserLocalPersistence : browserSessionPersistence
+            );
 
+            // ✅ SIGNUP
             if (isSignup) {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const userCredential = await createUserWithEmailAndPassword(
+                    auth,
+                    email,
+                    password
+                );
+
                 const user = userCredential.user;
 
-                // ✅ SET displayName in Firebase Auth
                 await updateProfile(user, {
-                    displayName: displayName
+                    displayName: displayName || email
                 });
 
-                // ✅ Save in Realtime DB
                 await set(ref(db, `users/${user.uid}`), {
                     uid: user.uid,
                     email,
-                    displayName,
+                    displayName: displayName || email,
                     isAdmin,
                     isAccepted: false,
                     bpUsername: '',
@@ -69,15 +84,19 @@ const SignUpPage = () => {
                 });
 
                 console.log('User created:', user);
-            } else {
-                // 🔥 LOGIN
+            }
+
+            // ✅ LOGIN
+            else {
                 await signInWithEmailAndPassword(auth, email, password);
             }
 
             router.push('/');
         } catch (err: any) {
-            console.error(err);
-            setError(err.message || 'Something went wrong');
+            console.log('Firebase Error Code:', err.code);
+            console.log('Firebase Error Message:', err.message);
+
+            setError(err.code || err.message);
         } finally {
             setLoading(false);
         }
@@ -90,15 +109,17 @@ const SignUpPage = () => {
     return (
         <div className={containerClassName}>
             <div className="flex flex-column align-items-center justify-content-center">
-                <div className="w-full surface-card py-8 px-5 sm:px-8" style={{ borderRadius: '20px', width: '400px' }}>
-
+                <div
+                    className="w-full surface-card py-8 px-5 sm:px-8"
+                    style={{ borderRadius: '20px', width: '400px' }}
+                >
                     <div className="text-center mb-5">
                         <div className="text-900 text-3xl font-medium mb-3">
                             {isSignup ? 'Create Account' : 'Welcome Back'}
                         </div>
                     </div>
 
-                    {/* Name (Signup only) */}
+                    {/* Name */}
                     {isSignup && (
                         <>
                             <label className="block mb-2">Name</label>
@@ -130,7 +151,7 @@ const SignUpPage = () => {
                         inputClassName="w-full"
                     />
 
-                    {/* isAdmin (Signup only) */}
+                    {/* Admin */}
                     {isSignup && (
                         <div className="flex align-items-center gap-2 mb-3">
                             <Checkbox
@@ -141,7 +162,7 @@ const SignUpPage = () => {
                         </div>
                     )}
 
-                    {/* Remember me */}
+                    {/* Remember */}
                     <div className="flex align-items-center mb-3">
                         <Checkbox
                             checked={checked}
@@ -154,7 +175,13 @@ const SignUpPage = () => {
                     {error && <p className="text-red-500">{error}</p>}
 
                     <Button
-                        label={loading ? 'Please wait...' : isSignup ? 'Sign Up' : 'Sign In'}
+                        label={
+                            loading
+                                ? 'Please wait...'
+                                : isSignup
+                                ? 'Sign Up'
+                                : 'Sign In'
+                        }
                         className="w-full mt-3"
                         onClick={handleAuth}
                         disabled={loading}
