@@ -228,7 +228,11 @@ const Withdrawals = () => {
 
     if (loading) return <div className="p-4 text-center">Loading withdrawals...</div>;
 
-    const filteredWithdrawals = (selectedStatus ? withdrawals.filter((d) => d.status === selectedStatus) : withdrawals).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    const filteredWithdrawals = (selectedStatus ? withdrawals.filter((d) => d.status === selectedStatus) : withdrawals).sort((a, b) => {
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return dateB - dateA;
+    });
 
     return (
         <div className="grid">

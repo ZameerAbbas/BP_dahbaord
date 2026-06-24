@@ -25,15 +25,19 @@ const WithdrawalTiming = () => {
     useEffect(() => {
         const fetchData = async () => {
             setLoading(true);
-            const data = await getAllWithdrawalTimes();
+            try {
+                const data = await getAllWithdrawalTimes();
 
-            if (data) {
-                const firstEntry = Object.values(data)[0];
-                setForm(firstEntry);
-                setIsEdit(true);
+                if (data) {
+                    const firstEntry = Object.values(data)[0];
+                    setForm(firstEntry);
+                    setIsEdit(true);
+                }
+            } catch (error) {
+                console.error('Error loading withdrawal times:', error);
+            } finally {
+                setLoading(false);
             }
-
-            setLoading(false);
         };
 
         fetchData();

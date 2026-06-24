@@ -433,14 +433,21 @@ export const updateSupport = async (uid: string, data: any) => {
 export const listenBanks = (callback: (data: any[]) => void) => {
   const banksRef = ref(db, "banks");
 
-  const unsubscribe = onValue(banksRef, (snapshot) => {
-    if (snapshot.exists()) {
-      const data = snapshot.val();
-      callback(Object.values(data));
-    } else {
+  const unsubscribe = onValue(
+    banksRef,
+    (snapshot) => {
+      if (snapshot.exists()) {
+        const data = snapshot.val();
+        callback(Object.values(data));
+      } else {
+        callback([]);
+      }
+    },
+    (error) => {
+      console.error("Error listening to banks:", error);
       callback([]);
     }
-  });
+  );
 
   return () => unsubscribe();
 };
