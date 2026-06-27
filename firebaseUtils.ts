@@ -1,6 +1,7 @@
 
 import { db } from './firebase';
-import { ref, get, update, child, remove, onValue, set, push } from 'firebase/database';
+import { ref, get, update, child, remove, onValue, set, push, query, orderByChild, equalTo, limitToLast } from 'firebase/database';
+import { subscribeToPath, transformOrders, transformUsers } from './lib/sharedCache';
 
 export interface OrderType {
   id: string;
@@ -77,21 +78,58 @@ export const getAllUsers = async () => {
   return {};
 };
 
+// In-memory cache with 30-second TTL
+const userCache: { data: any; timestamp: number } = { data: null, timestamp: 0 };
+const USER_CACHE_TTL = 30_000; // 30 seconds
+
+export const getCachedUsers = async () => {
+  const now = Date.now();
+  if (userCache.data && now - userCache.timestamp < USER_CACHE_TTL) {
+    return userCache.data;
+  }
+  const data = await getAllUsers();
+  userCache.data = data;
+  userCache.timestamp = now;
+  return data;
+};
+
+export const invalidateUserCache = () => {
+  userCache.data = null;
+  userCache.timestamp = 0;
+};
+
+/** Lightweight count — uses shared cache so no extra network call */
+export const getUserCounts = async (): Promise<{ total: number; active: number; inactive: number }> => {
+  const usersObj = await getCachedUsers();
+  if (!usersObj || Object.keys(usersObj).length === 0) {
+    return { total: 0, active: 0, inactive: 0 };
+  }
+
+  let total = 0;
+  let active = 0;
+  let inactive = 0;
+
+  for (const key of Object.keys(usersObj)) {
+    total++;
+    const u = usersObj[key];
+    if (u.isAccepted === true) active++;
+    else inactive++;
+  }
+
+  return { total, active, inactive };
+};
+
 
 
 export const getUserByName = async (name: string) => {
-  const usersRef = ref(db, "users");
-  const snapshot = await get(usersRef);
+  const usersObj = await getCachedUsers();
 
-  if (!snapshot.exists()) return null;
-
-  const usersObj = snapshot.val();
+  if (!usersObj || Object.keys(usersObj).length === 0) return null;
 
   const userList = Object.entries(usersObj).map(([uid, userData]: [string, any]) => ({
     uid,
     ...userData,
   }));
-
 
   const user = userList.find(u => u.displayName?.toLowerCase() === name.toLowerCase() || u.userName?.toLowerCase() === name.toLowerCase());
 
@@ -99,23 +137,16 @@ export const getUserByName = async (name: string) => {
 };
 
 export const getAllPendingUsers = (callback: (users: UserType[]) => void) => {
-  const userRef = ref(db, 'users');
-
-  const unsubscribe = onValue(userRef, (snapshot) => {
-    const userObj = snapshot.val() || {};
-
-    // Convert object to array and filter pending users
-    const pendingUsers: UserType[] = Object.entries(userObj)
-      .map(([uid, userData]: [string, any]) => ({
-        uid,
-        ...userData,
-      }))
-      .filter((user) => user.isAccepted === false && user.isAdmin === false);
-
-    callback(pendingUsers);
-  });
-
-  return () => unsubscribe();
+  return subscribeToPath<UserType[]>(
+    'users',
+    (allUsers) => {
+      const pending = allUsers.filter(
+        (u: UserType) => u.isAccepted === false && u.isAdmin === false
+      );
+      callback(pending);
+    },
+    transformUsers
+  );
 };
 
 
@@ -123,7 +154,7 @@ export const getAllPendingUsers = (callback: (users: UserType[]) => void) => {
 export const updateUserStatus = async (uid: string, isAccepted: boolean) => {
   const userRef = ref(db, `users/${uid}`);
   await update(userRef, { isAccepted });
-  await console.log("update done")
+  invalidateUserCache();
 };
 
 export const updateUser = async (uid: string, updatedUser: Partial<UserType>) => {
@@ -137,7 +168,7 @@ export const updateUser = async (uid: string, updatedUser: Partial<UserType>) =>
       updatedAt: new Date().toISOString(),
     });
 
-    console.log("update done");
+    invalidateUserCache();
   } catch (error) {
     console.error("Error updating user:", error);
     throw error;
@@ -150,7 +181,7 @@ export const deleteUser = async (uid: string) => {
   try {
     const userRef = ref(db, `users/${uid}`);
     await remove(userRef);
-    console.log("User deleted successfully");
+    invalidateUserCache();
   } catch (error) {
     console.error("Error deleting user:", error);
     throw error;
@@ -171,25 +202,16 @@ export const getAllOrders = async () => {
 
 
 export const listenDepositOrders = (callback: (deposits: OrderType[]) => void) => {
-  const ordersRef = ref(db, 'orders');
-
-  const unsubscribe = onValue(ordersRef, (snapshot) => {
-    const ordersObj = snapshot.val() || {};
-
-    const depositsList: OrderType[] = Object.entries(ordersObj)
-      .flatMap(([uid, orderData]: [string, any]) =>
-        Object.entries(orderData).map(([orderId, order]: [string, any]) => ({
-          id: orderId,
-          uid,
-          ...order,
-        }))
-      )
-      .filter((order: OrderType) => order.isDeposit === true && order.status === "pending");
-
-    callback(depositsList);
-  });
-
-  return () => unsubscribe(); // Call this to stop listening
+  return subscribeToPath<OrderType[]>(
+    'orders',
+    (allOrders) => {
+      const deposits = allOrders.filter(
+        (o: OrderType) => o.isDeposit === true && o.status === 'pending'
+      );
+      callback(deposits);
+    },
+    transformOrders
+  );
 };
 export const listenDepositOrdersPending = (callback: (deposits: OrderType[]) => void) => {
   const ordersRef = ref(db, 'orders');
@@ -240,25 +262,16 @@ export const listenDepositOrdersPendingByUserID = (
 
 // Get all withdrawal orders
 export const listenWithdrawalOrders = (callback: (withdrawals: OrderType[]) => void) => {
-  const ordersRef = ref(db, 'orders');
-
-  const unsubscribe = onValue(ordersRef, (snapshot) => {
-    const ordersObj = snapshot.val() || {};
-
-    const withdrawalsList: OrderType[] = Object.entries(ordersObj)
-      .flatMap(([uid, orderData]: [string, any]) =>
-        Object.entries(orderData).map(([orderId, order]: [string, any]) => ({
-          id: orderId,
-          uid,
-          ...order,
-        }))
-      )
-      .filter((order: OrderType) => order.isDeposit === false && order.status === "pending");
-
-    callback(withdrawalsList);
-  });
-
-  return () => unsubscribe(); // Call this to stop listening
+  return subscribeToPath<OrderType[]>(
+    'orders',
+    (allOrders) => {
+      const withdrawals = allOrders.filter(
+        (o: OrderType) => o.isDeposit === false && o.status === 'pending'
+      );
+      callback(withdrawals);
+    },
+    transformOrders
+  );
 };
 export const listenWithdrawalOrdersPending = (callback: (withdrawals: OrderType[]) => void) => {
   const ordersRef = ref(db, 'orders');

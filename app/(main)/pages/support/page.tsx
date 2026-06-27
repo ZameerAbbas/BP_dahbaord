@@ -10,6 +10,7 @@ import {
     supportType,
     updateSupport
 } from '@/firebaseUtils';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 
 
@@ -66,7 +67,7 @@ const Support = () => {
         }
     };
 
-    if (loading) return <div>Loading...</div>;
+    if (loading) return <LoadingSpinner text="Loading support..." fullPage />;
 
     return (
         <div className="card">

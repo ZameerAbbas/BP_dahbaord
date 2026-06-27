@@ -9,6 +9,7 @@ import { Tag } from 'primereact/tag';
 import { listenBanks, updateBankStatus, deleteBank } from '@/firebaseUtils';
 import { useRouter } from 'next/navigation';
 import { LayoutContext } from '@/layout/context/layoutcontext';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 export interface bankInfoType {
     uid: string;
@@ -81,6 +82,8 @@ const Banks = () => {
         localStorage.setItem('bankId', JSON.stringify(bank.uid));
         router.push(`/pages/cerateupdatebank`);
     };
+
+    if (loading) return <LoadingSpinner text="Loading banks..." fullPage />;
 
     return (
         <div className="card">

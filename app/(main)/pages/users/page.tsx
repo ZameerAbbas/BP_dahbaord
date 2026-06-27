@@ -6,10 +6,11 @@ import { DataTable, DataTableFilterMeta } from 'primereact/datatable';
 import { InputText } from 'primereact/inputtext';
 import { classNames } from 'primereact/utils';
 import React, { useEffect, useState, useRef, useContext } from 'react';
-import { deleteUser, getAllUsers, updateUserStatus, UserType } from '@/firebaseUtils';
+import { deleteUser, getCachedUsers, updateUserStatus, UserType } from '@/firebaseUtils';
 import { Toast } from 'primereact/toast';
 import { useRouter } from 'next/navigation';
 import { LayoutContext } from '@/layout/context/layoutcontext';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 const Users = () => {
     const [users, setUsers] = useState<UserType[]>([]);
@@ -92,7 +93,7 @@ const Users = () => {
     };
 
     const loadUsers = async () => {
-        const usersObj = await getAllUsers();
+        const usersObj = await getCachedUsers();
         const userList = Object.entries(usersObj).map(([uid, data]: [string, any]) => ({
             uid,
             ...data
@@ -111,7 +112,7 @@ const Users = () => {
         setUsers((prev) => prev.map((u) => (u.uid === uid ? { ...u, isAccepted: newValue } : u)));
     };
 
-    if (loading) return <div className="p-4">Loading users...</div>;
+    if (loading) return <LoadingSpinner text="Loading users..." fullPage />;
 
     const actionBodyTemplate = (rowData: UserType) => {
         return (

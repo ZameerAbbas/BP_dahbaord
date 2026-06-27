@@ -9,6 +9,7 @@ import { getAllPendingUsers, updateUserStatus, UserType } from '@/firebaseUtils'
 
 import { useRouter } from 'next/navigation';
 import { LayoutContext } from '@/layout/context/layoutcontext';
+import LoadingSpinner from '@/components/LoadingSpinner';
 const Users = () => {
     const { layoutConfig } = useContext(LayoutContext);
     const [users, setUsers] = useState<UserType[]>([]);
@@ -88,7 +89,7 @@ const Users = () => {
         setSelectedUsers([]);
     };
 
-    if (loading) return <div className="p-4">Loading users...</div>;
+    if (loading) return <LoadingSpinner text="Loading users..." fullPage />;
 
     const editLatePayments = (userData: UserType) => {
         localStorage.setItem('userData', JSON.stringify(userData));

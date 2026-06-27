@@ -11,6 +11,7 @@ import { Dropdown } from 'primereact/dropdown';
 import { Dialog } from 'primereact/dialog';
 import { useRouter } from 'next/navigation';
 import { LayoutContext } from '@/layout/context/layoutcontext';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 interface UserType {
     uid: string;
@@ -226,7 +227,7 @@ const Withdrawals = () => {
 
     const header = renderHeader();
 
-    if (loading) return <div className="p-4 text-center">Loading withdrawals...</div>;
+    if (loading) return <LoadingSpinner text="Loading withdrawals..." fullPage />;
 
     const filteredWithdrawals = (selectedStatus ? withdrawals.filter((d) => d.status === selectedStatus) : withdrawals).sort((a, b) => {
         const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;

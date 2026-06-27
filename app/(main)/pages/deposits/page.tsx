@@ -10,6 +10,7 @@ import { listenDepositOrders, OrderType, updateOrderStatus } from '@/firebaseUti
 import { Dropdown } from 'primereact/dropdown';
 import { Dialog } from 'primereact/dialog';
 import { LayoutContext } from '@/layout/context/layoutcontext';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 
 interface UserType {
@@ -203,7 +204,7 @@ const Deposits = () => {
 
     const header = renderHeader();
 
-    if (loading) return <div className="p-4 text-center">Loading deposits...</div>;
+    if (loading) return <LoadingSpinner text="Loading deposits..." fullPage />;
 
     const filteredDeposits = (selectedStatus ? deposits.filter((d) => d.status === selectedStatus) : deposits).sort((a, b) => {
         const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;

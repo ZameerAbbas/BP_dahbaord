@@ -5,6 +5,7 @@ import { InputTextarea } from 'primereact/inputtextarea';
 import { Button } from 'primereact/button';
 
 import { getAllAleartNotes, createAleartNote, updateAleartNote, aleartNoteType } from '@/firebaseUtils';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 const AleartNote = () => {
     const [form, setForm] = useState<aleartNoteType>({
@@ -67,7 +68,7 @@ const AleartNote = () => {
         }
     };
 
-    
+    if (loading) return <LoadingSpinner text="Loading alert notes..." fullPage />;
 
     return (
         <div className="card">

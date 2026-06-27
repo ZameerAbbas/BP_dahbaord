@@ -7,6 +7,7 @@ import { Button } from 'primereact/button';
 import { getAllWithdrawalTimes, createWithdrawalTime, withdrawalTimeType, updateWithdrawalTime } from '@/firebaseUtils';
 import { Calendar } from 'primereact/calendar';
 import { InputSwitch } from 'primereact/inputswitch';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 const WithdrawalTiming = () => {
     const [form, setForm] = useState<withdrawalTimeType>({
@@ -101,7 +102,7 @@ const WithdrawalTiming = () => {
         }
     };
 
-    if (loading) return <div>Loading...</div>;
+    if (loading) return <LoadingSpinner text="Loading withdrawal times..." fullPage />;
 
     console.log('Current Form State:', form);
 
