@@ -6,7 +6,7 @@ import { DataTable, DataTableFilterMeta } from 'primereact/datatable';
 import { InputText } from 'primereact/inputtext';
 import { classNames } from 'primereact/utils';
 import React, { useEffect, useState ,useContext} from 'react';
-import { listenDepositOrdersIndex, OrderType, updateOrderStatus } from '@/firebaseUtils';
+import { listenPendingDeposits, OrderType, updateOrderStatus } from '@/firebaseUtils';
 import { Dropdown } from 'primereact/dropdown';
 import { Dialog } from 'primereact/dialog';
 import { LayoutContext } from '@/layout/context/layoutcontext';
@@ -33,7 +33,7 @@ const Deposits = () => {
     const [globalFilterValue, setGlobalFilterValue] = useState('');
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [isDialogVisible, setIsDialogVisible] = useState(false);
-    const [selectedStatus, setSelectedStatus] = useState<string>('pending');
+    const [selectedStatus, setSelectedStatus] = useState<string>('');
 
     const clearFilter = () => {
         initFilters();
@@ -173,7 +173,7 @@ const Deposits = () => {
     useEffect(() => {
         setLoading(true);
 
-        const unsubscribe = listenDepositOrdersIndex((depositsList) => {
+        const unsubscribe = listenPendingDeposits((depositsList) => {
             setDeposits(depositsList);
             setLoading(false);
         });
