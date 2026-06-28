@@ -6,7 +6,7 @@ import { DataTable, DataTableFilterMeta } from 'primereact/datatable';
 import { InputText } from 'primereact/inputtext';
 import { classNames } from 'primereact/utils';
 import React, { useContext, useEffect, useState } from 'react';
-import { listenWithdrawalOrders, OrderType, updateOrderStatus } from '@/firebaseUtils';
+import { listenWithdrawalOrdersIndex, OrderType, updateOrderStatus } from '@/firebaseUtils';
 import { Dropdown } from 'primereact/dropdown';
 import { Dialog } from 'primereact/dialog';
 import { useRouter } from 'next/navigation';
@@ -33,7 +33,7 @@ const Withdrawals = () => {
     const [globalFilterValue, setGlobalFilterValue] = useState('');
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [isDialogVisible, setIsDialogVisible] = useState(false);
-    const [selectedStatus, setSelectedStatus] = useState<string>('');
+    const [selectedStatus, setSelectedStatus] = useState<string>('pending');
 
     const router = useRouter();
 
@@ -178,7 +178,7 @@ const Withdrawals = () => {
 
     useEffect(() => {
         setLoading(true);
-        const unsubscribeWithdrawals = listenWithdrawalOrders((withdrawalsList) => {
+        const unsubscribeWithdrawals = listenWithdrawalOrdersIndex((withdrawalsList) => {
             setWithdrawals(withdrawalsList);
             setLoading(false);
         });
@@ -243,10 +243,11 @@ const Withdrawals = () => {
                     {header}
                     <DataTable
                         value={filteredWithdrawals}
-                        // paginator
+                        paginator
                         className={`p-datatable-gridlines ${layoutConfig.colorScheme === 'dark' ? 'custom-dark-table' : 'custom-light-table'}`}
                         showGridlines
-                        // rows={10}
+                        rows={25}
+                        rowsPerPageOptions={[10, 25, 50, 100]}
                         dataKey="id"
                         filters={filters}
                         filterDisplay="menu"

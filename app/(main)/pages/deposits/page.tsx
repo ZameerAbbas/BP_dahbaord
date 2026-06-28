@@ -6,7 +6,7 @@ import { DataTable, DataTableFilterMeta } from 'primereact/datatable';
 import { InputText } from 'primereact/inputtext';
 import { classNames } from 'primereact/utils';
 import React, { useEffect, useState ,useContext} from 'react';
-import { listenDepositOrders, OrderType, updateOrderStatus } from '@/firebaseUtils';
+import { listenDepositOrdersIndex, OrderType, updateOrderStatus } from '@/firebaseUtils';
 import { Dropdown } from 'primereact/dropdown';
 import { Dialog } from 'primereact/dialog';
 import { LayoutContext } from '@/layout/context/layoutcontext';
@@ -33,7 +33,7 @@ const Deposits = () => {
     const [globalFilterValue, setGlobalFilterValue] = useState('');
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [isDialogVisible, setIsDialogVisible] = useState(false);
-    const [selectedStatus, setSelectedStatus] = useState<string>('');
+    const [selectedStatus, setSelectedStatus] = useState<string>('pending');
 
     const clearFilter = () => {
         initFilters();
@@ -173,10 +173,9 @@ const Deposits = () => {
     useEffect(() => {
         setLoading(true);
 
-        const unsubscribe = listenDepositOrders((depositsList) => {
+        const unsubscribe = listenDepositOrdersIndex((depositsList) => {
             setDeposits(depositsList);
             setLoading(false);
-            initFilters();
         });
 
         return () => unsubscribe();
@@ -221,10 +220,11 @@ const Deposits = () => {
                     {header}
                     <DataTable
                         value={filteredDeposits}
-                        // paginator
+                        paginator
                         className={`p-datatable-gridlines ${layoutConfig.colorScheme === 'dark' ? 'custom-dark-table' : 'custom-light-table'}`}
                         showGridlines
-                        // rows={10}
+                        rows={25}
+                        rowsPerPageOptions={[10, 25, 50, 100]}
                         dataKey="id"
                         filters={filters}
                         filterDisplay="menu"

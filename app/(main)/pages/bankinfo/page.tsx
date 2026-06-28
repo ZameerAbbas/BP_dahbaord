@@ -112,7 +112,7 @@ const Banks = () => {
             </div>
 
             {/* TABLE */}
-            <DataTable value={banks} loading={loading} showGridlines scrollable scrollHeight="60vh" className={`p-datatable-gridlines ${layoutConfig.colorScheme === 'dark' ? 'custom-dark-table' : 'custom-light-table'}`}>
+            <DataTable value={banks} paginator rows={25} rowsPerPageOptions={[10, 25, 50, 100]} loading={loading} showGridlines scrollable scrollHeight="60vh" className={`p-datatable-gridlines ${layoutConfig.colorScheme === 'dark' ? 'custom-dark-table' : 'custom-light-table'}`}>
                 <Column
                     field="bankName"
                     header="Bank Name"

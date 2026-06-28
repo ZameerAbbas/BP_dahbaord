@@ -1,6 +1,6 @@
 
 import { db } from './firebase';
-import { ref, get, update, child, remove, onValue, set, push, query, orderByChild, equalTo, limitToLast } from 'firebase/database';
+import { ref, get, update, remove, onValue, set, push } from 'firebase/database';
 import { subscribeToPath, transformOrders, transformUsers } from './lib/sharedCache';
 
 export interface OrderType {
@@ -199,8 +199,6 @@ export const getAllOrders = async () => {
   return {};
 };
 
-
-
 export const listenDepositOrders = (callback: (deposits: OrderType[]) => void) => {
   return subscribeToPath<OrderType[]>(
     'orders',
@@ -261,6 +259,54 @@ export const listenDepositOrdersPendingByUserID = (
 };
 
 // Get all withdrawal orders
+/**
+ * Listener — fetches all orders and filters for deposits (isDeposit === true).
+ * Status filtering is done locally in the component (default: 'pending').
+ */
+export const listenDepositOrdersIndex = (callback: (deposits: OrderType[]) => void) => {
+  const ordersRef = ref(db, 'orders');
+
+  const unsubscribe = onValue(ordersRef, (snapshot) => {
+    const ordersObj = snapshot.val() || {};
+    const list: OrderType[] = Object.entries(ordersObj)
+      .flatMap(([uid, orderData]: [string, any]) =>
+        Object.entries(orderData).map(([orderId, order]: [string, any]) => ({
+          id: orderId,
+          uid,
+          ...order,
+        }))
+      )
+      .filter((o: OrderType) => o.isDeposit === true);
+    callback(list);
+  });
+
+  return () => unsubscribe();
+};
+
+/**
+ * Listener — fetches all orders and filters for withdrawals (isDeposit === false).
+ * Status filtering is done locally in the component (default: 'pending').
+ */
+export const listenWithdrawalOrdersIndex = (callback: (withdrawals: OrderType[]) => void) => {
+  const ordersRef = ref(db, 'orders');
+
+  const unsubscribe = onValue(ordersRef, (snapshot) => {
+    const ordersObj = snapshot.val() || {};
+    const list: OrderType[] = Object.entries(ordersObj)
+      .flatMap(([uid, orderData]: [string, any]) =>
+        Object.entries(orderData).map(([orderId, order]: [string, any]) => ({
+          id: orderId,
+          uid,
+          ...order,
+        }))
+      )
+      .filter((o: OrderType) => o.isDeposit === false);
+    callback(list);
+  });
+
+  return () => unsubscribe();
+};
+
 export const listenWithdrawalOrders = (callback: (withdrawals: OrderType[]) => void) => {
   return subscribeToPath<OrderType[]>(
     'orders',
@@ -323,7 +369,8 @@ export const listenWithdrawalOrdersPendingByUserID = (
 
 export const updateOrderStatus = async (uid: string, orderId: string, newStatus: string) => {
   const orderRef = ref(db, `orders/${uid}/${orderId}`);
-  await update(orderRef, { status: newStatus });
+  await update(orderRef, { status: newStatus, updatedAt: new Date().toISOString() });
+
   console.log(`Order ${orderId} of user ${uid} updated with status=${newStatus}`);
 };
 

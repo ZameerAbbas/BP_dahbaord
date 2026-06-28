@@ -196,10 +196,11 @@ const Users = () => {
 
                     <DataTable
                         value={displayUsers}
-                        // paginator
+                        paginator
                         className={`p-datatable-gridlines ${layoutConfig.colorScheme === 'dark' ? 'custom-dark-table' : 'custom-light-table'}`}
                         showGridlines
-                        // rows={10}
+                        rows={25}
+                        rowsPerPageOptions={[10, 25, 50, 100]}
                         dataKey="uid"
                         filters={filters}
                         filterDisplay="menu"
