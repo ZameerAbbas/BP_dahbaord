@@ -6,7 +6,7 @@ import { DataTable, DataTableFilterMeta } from 'primereact/datatable';
 import { InputText } from 'primereact/inputtext';
 import { classNames } from 'primereact/utils';
 import React, { useContext, useEffect, useState } from 'react';
-import { listenPendingWithdrawals, OrderType, updateOrderStatus } from '@/firebaseUtils';
+import { listenWithdrawalOrdersIndex, OrderType, updateOrderStatus } from '@/firebaseUtils';
 import { Dropdown } from 'primereact/dropdown';
 import { Dialog } from 'primereact/dialog';
 import { useRouter } from 'next/navigation';
@@ -33,7 +33,7 @@ const Withdrawals = () => {
     const [globalFilterValue, setGlobalFilterValue] = useState('');
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [isDialogVisible, setIsDialogVisible] = useState(false);
-    const [selectedStatus, setSelectedStatus] = useState<string>('');
+    const [selectedStatus, setSelectedStatus] = useState<string>('pending');
 
     const router = useRouter();
 
@@ -178,7 +178,7 @@ const Withdrawals = () => {
 
     useEffect(() => {
         setLoading(true);
-        const unsubscribeWithdrawals = listenPendingWithdrawals((withdrawalsList) => {
+        const unsubscribeWithdrawals = listenWithdrawalOrdersIndex((withdrawalsList) => {
             setWithdrawals(withdrawalsList);
             setLoading(false);
         });

@@ -1,6 +1,6 @@
 
 import { db } from './firebase';
-import { ref, get, update, remove, onValue, set, push, query, limitToLast, off } from 'firebase/database';
+import { ref, get, update, remove, onValue, set, push } from 'firebase/database';
 import { subscribeToPath, transformOrders, transformUsers } from './lib/sharedCache';
 
 export interface OrderType {
@@ -98,48 +98,25 @@ export const invalidateUserCache = () => {
   userCache.timestamp = 0;
 };
 
-/**
- * Lightweight count — reads a tiny stats node instead of downloading all users.
- * The stats node is maintained by updateUserStatus, deleteUser, and signup.
- */
+/** Lightweight count — uses shared cache so no extra network call */
 export const getUserCounts = async (): Promise<{ total: number; active: number; inactive: number }> => {
-  const statsRef = ref(db, 'stats/userCounts');
-  const snapshot = await get(statsRef);
-  if (snapshot.exists()) {
-    return snapshot.val();
-  }
-  // Fallback: compute from full users list (first time only)
   const usersObj = await getCachedUsers();
   if (!usersObj || Object.keys(usersObj).length === 0) {
     return { total: 0, active: 0, inactive: 0 };
   }
-  let total = 0;
-  let active = 0;
-  let inactive = 0;
-  for (const key of Object.keys(usersObj)) {
-    total++;
-    const u = usersObj[key];
-    if (u.isAccepted === true) active++;
-    else inactive++;
-  }
-  // Seed the stats node for next time
-  await set(statsRef, { total, active, inactive });
-  return { total, active, inactive };
-};
 
-/** Recompute and save stats from the full users list (call after bulk changes) */
-export const recomputeUserStats = async () => {
-  const usersObj = await getAllUsers();
   let total = 0;
   let active = 0;
   let inactive = 0;
+
   for (const key of Object.keys(usersObj)) {
     total++;
     const u = usersObj[key];
     if (u.isAccepted === true) active++;
     else inactive++;
   }
-  await set(ref(db, 'stats/userCounts'), { total, active, inactive });
+
+  return { total, active, inactive };
 };
 
 
@@ -176,22 +153,8 @@ export const getAllPendingUsers = (callback: (users: UserType[]) => void) => {
 
 export const updateUserStatus = async (uid: string, isAccepted: boolean) => {
   const userRef = ref(db, `users/${uid}`);
-  // Read old value before updating
-  const oldSnap = await get(ref(db, `users/${uid}/isAccepted`));
-  const wasAccepted = oldSnap.val();
   await update(userRef, { isAccepted });
   invalidateUserCache();
-  // Update stats atomically
-  const statsRef = ref(db, 'stats/userCounts');
-  const statsSnap = await get(statsRef);
-  if (statsSnap.exists()) {
-    const stats = statsSnap.val();
-    if (wasAccepted === true && !isAccepted) {
-      await set(statsRef, { total: stats.total, active: stats.active - 1, inactive: stats.inactive + 1 });
-    } else if ((!wasAccepted || wasAccepted === false) && isAccepted) {
-      await set(statsRef, { total: stats.total, active: stats.active + 1, inactive: stats.inactive - 1 });
-    }
-  }
 };
 
 export const updateUser = async (uid: string, updatedUser: Partial<UserType>) => {
@@ -217,25 +180,8 @@ export const updateUser = async (uid: string, updatedUser: Partial<UserType>) =>
 export const deleteUser = async (uid: string) => {
   try {
     const userRef = ref(db, `users/${uid}`);
-    // Read user data before deleting (for stats)
-    const userSnap = await get(userRef);
-    const userData = userSnap.val();
     await remove(userRef);
     invalidateUserCache();
-    // Update stats
-    if (userData) {
-      const statsRef = ref(db, 'stats/userCounts');
-      const statsSnap = await get(statsRef);
-      if (statsSnap.exists()) {
-        const stats = statsSnap.val();
-        const isActive = userData.isAccepted === true;
-        await set(statsRef, {
-          total: Math.max(0, stats.total - 1),
-          active: isActive ? Math.max(0, stats.active - 1) : stats.active,
-          inactive: !isActive ? Math.max(0, stats.inactive - 1) : stats.inactive,
-        });
-      }
-    }
   } catch (error) {
     console.error("Error deleting user:", error);
     throw error;
@@ -314,14 +260,15 @@ export const listenDepositOrdersPendingByUserID = (
 
 // Get all withdrawal orders
 /**
- * Listener — fetches only pending deposits from the deposits/{uid}/{orderId} node.
+ * Listener — fetches all orders and filters for deposits (isDeposit === true).
+ * Status filtering is done locally in the component (default: 'pending').
  */
 export const listenDepositOrdersIndex = (callback: (deposits: OrderType[]) => void) => {
-  const depositsRef = ref(db, 'deposits');
+  const ordersRef = ref(db, 'orders');
 
-  const unsubscribe = onValue(depositsRef, (snapshot) => {
-    const depositsObj = snapshot.val() || {};
-    const list: OrderType[] = Object.entries(depositsObj)
+  const unsubscribe = onValue(ordersRef, (snapshot) => {
+    const ordersObj = snapshot.val() || {};
+    const list: OrderType[] = Object.entries(ordersObj)
       .flatMap(([uid, orderData]: [string, any]) =>
         Object.entries(orderData).map(([orderId, order]: [string, any]) => ({
           id: orderId,
@@ -329,7 +276,7 @@ export const listenDepositOrdersIndex = (callback: (deposits: OrderType[]) => vo
           ...order,
         }))
       )
-      .filter((o: OrderType) => o.status === 'pending');
+      .filter((o: OrderType) => o.isDeposit === true);
     callback(list);
   });
 
@@ -337,14 +284,15 @@ export const listenDepositOrdersIndex = (callback: (deposits: OrderType[]) => vo
 };
 
 /**
- * Listener — fetches only pending withdrawals from the withdrawals/{uid}/{orderId} node.
+ * Listener — fetches all orders and filters for withdrawals (isDeposit === false).
+ * Status filtering is done locally in the component (default: 'pending').
  */
 export const listenWithdrawalOrdersIndex = (callback: (withdrawals: OrderType[]) => void) => {
-  const withdrawalsRef = ref(db, 'withdrawals');
+  const ordersRef = ref(db, 'orders');
 
-  const unsubscribe = onValue(withdrawalsRef, (snapshot) => {
-    const withdrawalsObj = snapshot.val() || {};
-    const list: OrderType[] = Object.entries(withdrawalsObj)
+  const unsubscribe = onValue(ordersRef, (snapshot) => {
+    const ordersObj = snapshot.val() || {};
+    const list: OrderType[] = Object.entries(ordersObj)
       .flatMap(([uid, orderData]: [string, any]) =>
         Object.entries(orderData).map(([orderId, order]: [string, any]) => ({
           id: orderId,
@@ -352,98 +300,11 @@ export const listenWithdrawalOrdersIndex = (callback: (withdrawals: OrderType[])
           ...order,
         }))
       )
-      .filter((o: OrderType) => o.status === 'pending');
+      .filter((o: OrderType) => o.isDeposit === false);
     callback(list);
   });
 
   return () => unsubscribe();
-};
-
-// ──────────────────────────────────────────────
-// FAST PENDING INDEXES (flat nodes, no iteration)
-// ──────────────────────────────────────────────
-
-/**
- * Listener — reads the flat pendingDeposits index instead of scanning all deposits.
- * Each entry: { uid, orderId, amount, userName, accountNumber, bpId, screenshot, createdAt, status }
- */
-export const listenPendingDeposits = (callback: (deposits: OrderType[]) => void) => {
-  const indexRef = ref(db, 'pendingDeposits');
-
-  const unsubscribe = onValue(indexRef, (snapshot) => {
-    const obj = snapshot.val() || {};
-    const list: OrderType[] = Object.entries(obj).map(([orderId, entry]: [string, any]) => ({
-      id: orderId,
-      ...entry,
-    }));
-    callback(list);
-  });
-
-  return () => unsubscribe();
-};
-
-/**
- * Listener — reads the flat pendingWithdrawals index instead of scanning all withdrawals.
- */
-export const listenPendingWithdrawals = (callback: (withdrawals: OrderType[]) => void) => {
-  const indexRef = ref(db, 'pendingWithdrawals');
-
-  const unsubscribe = onValue(indexRef, (snapshot) => {
-    const obj = snapshot.val() || {};
-    const list: OrderType[] = Object.entries(obj).map(([orderId, entry]: [string, any]) => ({
-      id: orderId,
-      ...entry,
-    }));
-    callback(list);
-  });
-
-  return () => unsubscribe();
-};
-
-/**
- * Add/update an entry in the pendingDeposits index.
- * Only adds if status === 'pending', otherwise removes it.
- */
-export const updatePendingDepositIndex = async (uid: string, orderId: string, data: Partial<OrderType>) => {
-  const indexRef = ref(db, `pendingDeposits/${orderId}`);
-  if (data.status === 'pending') {
-    await set(indexRef, {
-      uid,
-      orderId,
-      amount: data.amount || 0,
-      userName: data.userName || '',
-      accountNumber: data.accountNumber || '',
-      bpId: data.bpId || '',
-      screenshot: data.screenshot || '',
-      createdAt: data.createdAt || new Date().toISOString(),
-      status: 'pending',
-    });
-  } else {
-    await remove(indexRef);
-  }
-};
-
-/**
- * Add/update an entry in the pendingWithdrawals index.
- * Only adds if status === 'pending', otherwise removes it.
- */
-export const updatePendingWithdrawalIndex = async (uid: string, orderId: string, data: Partial<OrderType>) => {
-  const indexRef = ref(db, `pendingWithdrawals/${orderId}`);
-  if (data.status === 'pending') {
-    await set(indexRef, {
-      uid,
-      orderId,
-      amount: data.amount || 0,
-      userName: data.userName || '',
-      accountNumber: data.accountNumber || '',
-      bpId: data.bpId || '',
-      screenshot: data.screenshot || '',
-      createdAt: data.createdAt || new Date().toISOString(),
-      status: 'pending',
-    });
-  } else {
-    await remove(indexRef);
-  }
 };
 
 export const listenWithdrawalOrders = (callback: (withdrawals: OrderType[]) => void) => {
@@ -507,23 +368,8 @@ export const listenWithdrawalOrdersPendingByUserID = (
 };
 
 export const updateOrderStatus = async (uid: string, orderId: string, newStatus: string) => {
-  const orderRef = ref(db, `deposits/${uid}/${orderId}`);
+  const orderRef = ref(db, `orders/${uid}/${orderId}`);
   await update(orderRef, { status: newStatus, updatedAt: new Date().toISOString() });
-
-  // Also update the deposits/withdrawals node if it exists
-  const depositRef = ref(db, `deposits/${uid}/${orderId}`);
-  const withdrawalRef = ref(db, `withdrawals/${uid}/${orderId}`);
-  try {
-    await update(depositRef, { status: newStatus, updatedAt: new Date().toISOString() });
-  } catch (_) { /* deposits node may not exist for this order */ }
-  try {
-    await update(withdrawalRef, { status: newStatus, updatedAt: new Date().toISOString() });
-  } catch (_) { /* withdrawals node may not exist for this order */ }
-
-  // Maintain pending indexes
-  const orderData = { status: newStatus };
-  await updatePendingDepositIndex(uid, orderId, orderData);
-  await updatePendingWithdrawalIndex(uid, orderId, orderData);
 
   console.log(`Order ${orderId} of user ${uid} updated with status=${newStatus}`);
 };
@@ -552,14 +398,6 @@ export const updateOrder = async (uid: string, orderId: string, data: OrderType)
     payload.updatedAt = new Date().toISOString()
 
     await update(orderRef, data);
-
-    // Maintain pending indexes
-    const isDeposit = data.isDeposit === true;
-    if (isDeposit) {
-      await updatePendingDepositIndex(uid, orderId, data);
-    } else {
-      await updatePendingWithdrawalIndex(uid, orderId, data);
-    }
 
     console.log("Order updated successfully");
   } catch (error) {
